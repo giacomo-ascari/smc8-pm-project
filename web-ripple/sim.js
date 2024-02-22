@@ -10,26 +10,23 @@ class Cell {
         this.pressureM2 = 0;
         this.pressure = 0
         this.material = 'a';
+        this.simulated = false;
     }
 }
 
-let materialList = ["w", "a", "v", "m"]
+let materialList = ["w", "a", "m"]
 let materialTable = {
     "w": { // wall
-        factor: 0,
+        amplification: 0,
         simulations: 1
     },
     "a": { // air
-        factor: 1,
-        simulations: 1
-    },
-    "v": { // void
-        factor: 0.97,
+        amplification: 1,
         simulations: 1
     },
     "m": { // metal
-        factor: 1,
-        simulations: 14
+        amplification: 1,
+        simulations: 2
     }
 }
 
@@ -53,7 +50,7 @@ class Space {
         }
 
         // apply high dampening areas on the border
-        iterate2d(xSize, ySize, (x, y) => {
+        /*iterate2d(xSize, ySize, (x, y) => {
             if (
                 x >= 0 && x < border ||
                 x >= xSize - border && x < xSize ||
@@ -62,18 +59,18 @@ class Space {
                 ) {
                 this.cells[x][y].material = 'v';
             }
-        })
+        })*/
 
         // medium for testing
         iterate2d(xSize, ySize, (x, y) => {
-            if (x >= 170 && x < 190 && y >= 60 && y < 190) {
+            if (x >= 135 && x < 165 && y >= 40 && y < 180) {
                 this.cells[x][y].material = 'm';
             }
         })
 
         // just a wall for testing
         for (let x = 70; x < xSize -100; x++) {
-            this.cells[x][100].material = 'w';
+            //this.cells[x][100].material = 'w';
         }
     }
 
@@ -84,16 +81,11 @@ class Space {
         iterate2d(this.xSize, this.ySize, (x, y, onBorder) => {
             if (this.cells[x][y].material == 'w') {
                 ctx.fillStyle = "#888888"
+            } else if (this.cells[x][y].material == 'm') {
+                ctx.fillStyle = RGBtoString(HSVtoRGB(0.95, 1, 0.5 * this.cells[x][y].pressure + 0.5))
             } else {
-                if (this.cells[x][y].material == 'v') {
-                    ctx.fillStyle = RGBtoString(HSVtoRGB(0.7, 0.7, 0.5 * this.cells[x][y].pressure + 0.5))
-                } else if (this.cells[x][y].material == 'm') {
-                    ctx.fillStyle = RGBtoString(HSVtoRGB(0.95, 1, 0.5 * this.cells[x][y].pressure + 0.5))
-                } else {
-                    ctx.fillStyle = RGBtoString(HSVtoRGB(0.5, 1, 0.5 * this.cells[x][y].pressure + 0.5))
-                    //ctx.fillStyle = RGBtoString(getSciColor(this.cells[x][y].pressure, -1, 1))
-                }
-                
+                ctx.fillStyle = RGBtoString(HSVtoRGB(0.5, 1, 0.5 * this.cells[x][y].pressure + 0.5))
+                //ctx.fillStyle = RGBtoString(getSciColor(this.cells[x][y].pressure, -1, 1))            
             }
 
             ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
@@ -103,42 +95,69 @@ class Space {
         })
     }
 
-    adjacentAvgPressure(x, y) {
+    adjacentAvgPressure(x, y, sameMaterial) {
         let adjacent = 0;
         let adjacentPressure = 0;
-        if (x != 0) {
+        let material = this.cells[x][y].material;
+        if (x != 0 && (sameMaterial == true && this.cells[x-1][y].material == material || sameMaterial == false)) {
             adjacentPressure += this.cells[x-1][y].pressureM1;
             adjacent++;
         }
-        if (x != this.xSize-1) {
+        if (x != this.xSize-1 && (sameMaterial == true && this.cells[x+1][y].material == material || sameMaterial == false)) {
             adjacentPressure += this.cells[x+1][y].pressureM1;
             adjacent++;
         }
-        if (y != 0) {
+        if (y != 0 && (sameMaterial == true && this.cells[x][y-1].material == material || sameMaterial == false)) {
             adjacentPressure += this.cells[x][y-1].pressureM1;
             adjacent++;
         }
-        if (y != this.ySize-1) {
+        if (y != this.ySize-1 && (sameMaterial == true && this.cells[x][y+1].material == material || sameMaterial == false)) {
             adjacentPressure += this.cells[x][y+1].pressureM1;
             adjacent++;
         }
         return adjacentPressure / adjacent;
     }
 
-    simulatePressure(material) {
+    simulatePressure(material, sameMaterial) {
         iterate2d(this.xSize, this.ySize, (x, y, onBorder) => {
             if (this.cells[x][y].material == material) {
-                this.cells[x][y].pressure = 2 * this.adjacentAvgPressure(x, y) - this.cells[x][y].pressureM2;
-                this.cells[x][y].pressure *= materialTable[material].factor;
+                this.cells[x][y].pressure = 2 * this.adjacentAvgPressure(x, y, sameMaterial) - this.cells[x][y].pressureM2;
+                this.cells[x][y].pressure *= materialTable[material].amplification;
+                this.cells[x][y].simulated = true;
             }
         })
     }
 
-    simulateTime(material) {
+    simulateTime() {
         iterate2d(this.xSize, this.ySize, (x, y, onBorder) => {
-            this.cells[x][y].pressureM2 = this.cells[x][y].pressureM1;
-            this.cells[x][y].pressureM1 = this.cells[x][y].pressure;
+            if (this.cells[x][y].simulated) {
+                this.cells[x][y].pressureM2 = this.cells[x][y].pressureM1;
+                this.cells[x][y].pressureM1 = this.cells[x][y].pressure;
+                this.cells[x][y].simulated = false;
+            }
         })
+    }
+
+    simulateBorders() {
+
+        for (let x = 0; x < this.xSize; x++) {
+            for (let b = 0; b < this.border; b++) {
+                for (let i=0; i <= b; i++) {
+                    this.cells[x][i].pressure *= 0.997;
+                    this.cells[x][this.ySize-i-1].pressure *= 0.997;
+                }
+            }
+        }
+
+        for (let y = 0; y < this.ySize; y++) {
+            for (let b = 0; b < this.border; b++) {
+                for (let i=0; i <= b; i++) {
+                    this.cells[i][y].pressure *= 0.997;
+                    this.cells[this.xSize-i-1][y].pressure *= 0.997;
+                }
+            }
+        }
+
     }
 
     sim() {
@@ -147,8 +166,8 @@ class Space {
         for (let i = 0; i < this.xSize; i++) {
             //this.cells[i][41].pressureM1 = 1 * Math.sin(this.iteration * this.T * 1 * 2 * Math.PI);
         }
-        this.cells[100][80].pressureM1 = 2 * Math.sin(this.iteration * this.T * 0.5 * 2 * Math.PI);
-        this.cells[this.xSize-101][80].pressureM1 = 2 * Math.sin(this.iteration * this.T * 1 * 2 * Math.PI);
+        this.cells[50][60].pressureM1 = 2 * Math.sin(this.iteration * this.T * 0.5 * 2 * Math.PI);
+        this.cells[this.xSize-51][60].pressureM1 = 2 * Math.sin(this.iteration * this.T * 1 * 2 * Math.PI);
 
         // this cells pressure at sample n is:
         // p[n] = r * ( 2 * avg(p_left[n-1], p_right[n-1], p_top[n-1], p_bot[n-1]) - p[n-2] )
@@ -156,19 +175,27 @@ class Space {
 
         // sim
         let simsCount = {}
-        let minSims = 10000;
         let maxSims = 0;
 
         materialList.forEach((item)=>{
-            simsCount.item = 0
-            if (materialTable)
+            simsCount[item] = materialTable[item].simulations;
+            if (simsCount[item] > maxSims) {
+                maxSims = simsCount[item];
+            }
         })
-        this.simulatePressure("a");
-        this.simulatePressure("w");
-        this.simulatePressure("v");
-        this.simulatePressure("m");
-        this.simulateTime();
 
+        for (let i = 0; i < maxSims; i++) {
+            materialList.forEach((item)=>{
+                if (simsCount[item] > 0) {
+                    console.log("simulating " + item)
+                    this.simulatePressure(item, simsCount[item] != materialTable[item].simulations);
+                    simsCount[item]--;
+                }
+            })
+            this.simulateBorders();
+            console.log("simulating TIME")
+            this.simulateTime();
+        }
 
         this.iteration++;
 
@@ -183,10 +210,10 @@ function onload() {
     
     // if fs is 192kHz then a cell is wide 1.786mm
     // v = 343 m/s --> h = v / fs
-    let space = new Space(280, 280, 0.1, 40)
+    let space = new Space(220, 220, 0.1, 30)
     console.log("space created")
 
-    let zoom = 3
+    let zoom = 4
     const canvas = document.getElementById("myCanvas");
     canvas.width = space.xSize * zoom;
     canvas.height = space.ySize * zoom;
@@ -194,7 +221,7 @@ function onload() {
     setInterval(() => {
         space.sim()
         space.render(canvas, zoom)
-    }, 50)
+    }, 100)
     console.log("interval set")
 
 }
