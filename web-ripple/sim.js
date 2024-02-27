@@ -39,6 +39,8 @@ class Space {
         this.T = T
         this.iteration = 0;
         this.border = border;
+        this.introducedPressure = 0;
+        this.spacePressure = 0;
 
         // create cells
         this.cells = new Array(xSize)
@@ -166,8 +168,14 @@ class Space {
         for (let i = 0; i < this.xSize; i++) {
             //this.cells[i][41].pressureM1 = 1 * Math.sin(this.iteration * this.T * 1 * 2 * Math.PI);
         }
-        this.cells[50][60].pressureM1 = 2 * Math.sin(this.iteration * this.T * 0.5 * 2 * Math.PI);
-        this.cells[this.xSize-51][60].pressureM1 = 2 * Math.sin(this.iteration * this.T * 1 * 2 * Math.PI);
+        if (this.iteration < 50) {
+            let source1 = 2 * Math.sin(this.iteration * this.T * 0.5 * 2 * Math.PI)
+            let source2 = 2 * Math.sin(this.iteration * this.T * 1 * 2 * Math.PI)
+            this.cells[50][60].pressureM1 = source1;
+            this.cells[this.xSize-51][60].pressureM1 = source2;
+            this.introducedPressure += Math.abs(source1) + Math.abs(source2);
+        }
+        
 
         // this cells pressure at sample n is:
         // p[n] = r * ( 2 * avg(p_left[n-1], p_right[n-1], p_top[n-1], p_bot[n-1]) - p[n-2] )
@@ -196,6 +204,14 @@ class Space {
             console.log("simulating TIME")
             this.simulateTime();
         }
+
+        this.spacePressure = 0;
+        iterate2d(this.xSize, this.ySize, (x, y, onBorder) => {
+            this.spacePressure += Math.abs(this.cells[x][y].pressure);
+        })
+
+        let v = this.introducedPressure / this.spacePressure;
+        console.log(this.introducedPressure + " / " + this.spacePressure + " = " + v);
 
         this.iteration++;
 
