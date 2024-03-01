@@ -51,18 +51,6 @@ class Space {
             }
         }
 
-        // apply high dampening areas on the border
-        /*iterate2d(xSize, ySize, (x, y) => {
-            if (
-                x >= 0 && x < border ||
-                x >= xSize - border && x < xSize ||
-                y >= 0 && y < border ||
-                y >= ySize - border && y < ySize
-                ) {
-                this.cells[x][y].material = 'v';
-            }
-        })*/
-
         // medium for testing
         iterate2d(xSize, ySize, (x, y) => {
             if (x >= 135 && x < 165 && y >= 40 && y < 180) {
