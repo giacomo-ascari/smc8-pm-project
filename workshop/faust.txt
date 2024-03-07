@@ -1,0 +1,56 @@
+import("stdfaust.lib");
+
+// MODAL SYNTH
+//freq(j) = ba.take(j+1, (110, 165, 220, 440, 880));
+
+freq = hslider("freq", 0, 0, 20000, 0.1);
+
+key = hslider("key[midi:key midikey]", 0, 0, 127, 1);
+
+centDev = 20;
+hammerPos = 0.8;
+dampening = -0.995;
+termOrder = 2;
+termRCutoff = 12000;
+termLCutoff = 15000;
+
+termLeft = pm.lTermination(_*dampening : fi.lowpass(termOrder, termLCutoff), pm.basicBlock);
+termRight = pm.rTermination(pm.basicBlock, _*dampening : fi.lowpass(termOrder, termLCutoff));
+
+string1(ex) = pm.endChain(
+    pm.chain(
+        termLeft : blockLeft : pm.in(ex) : blockRight : termRight : pm.out
+    )
+) with {
+    l = ma.SR / (freq * pow(2, centDev/1200)) / 2;
+    blockLeft = de.fdelay(512,  l * hammerPos), de.fdelay(512, l * hammerPos), _; 
+    blockRight = de.fdelay(512, l * (1-hammerPos)), de.fdelay(512,  l * (1-hammerPos)), _;
+};
+
+string2(ex) = pm.endChain(
+    pm.chain(
+        termLeft : blockLeft : pm.in(ex) : blockRight : termRight : pm.out
+    )
+) with {
+    l = ma.SR / freq / 2;
+    blockLeft = de.fdelay(512,  l * hammerPos), de.fdelay(512, l * hammerPos), _; 
+    blockRight = de.fdelay(512, l * (1-hammerPos)), de.fdelay(512,  l * (1-hammerPos)), _;
+};
+
+string3(ex) = pm.endChain(
+    pm.chain(
+        termLeft : blockLeft : pm.in(ex) : blockRight : termRight : pm.out
+    )
+) with {
+    l = ma.SR / (freq / pow(2, centDev/1200)) / 2;
+    blockLeft = de.fdelay(512,  l * hammerPos), de.fdelay(512, l * hammerPos), _; 
+    blockRight = de.fdelay(512, l * (1-hammerPos)), de.fdelay(512,  l * (1-hammerPos)), _;
+};
+
+trigger = button("gate");
+velocity = hslider("gain", 0, 0, 1, 0.01);
+model = _ <: string1, string2, string3 :> _;
+att = 0.001 * (1 - velocity);
+rel = 4/freq;
+process = (0.5 + velocity/2) * en.ar(att, rel, trigger) : model *0.5 <: _,_;
+
