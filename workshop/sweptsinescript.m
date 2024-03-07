@@ -83,9 +83,10 @@ disp("4");
 
 %% READ IR AND CONVOLVE
 
-[h,fs] = audioread("ir.wav");
+[h,fs] = audioread("irproc.wav");
 [x,fs] = audioread("recordings\\untitled.wav");
 
 y = conv(x, h);
-
+ynorm = y / max(abs(y));
 soundsc(y, fs);
+%audiowrite("untitled.wav", ynorm, fs);
