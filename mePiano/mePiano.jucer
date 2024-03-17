@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Y2gp0g" name="mePiano" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginManufacturer="giacomoAscari">
   <MAINGROUP id="bvNEbz" name="mePiano">
     <GROUP id="{EBF4075B-70B6-E442-BEEF-4B27D529BFDC}" name="Source">
       <FILE id="zAdbWd" name="PluginProcessor.cpp" compile="1" resource="0"

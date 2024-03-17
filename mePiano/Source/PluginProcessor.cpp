@@ -22,6 +22,12 @@ MePianoAudioProcessor::MePianoAudioProcessor()
                        )
 #endif
 {
+    mySynth.clearVoices();
+    for (int i = 0; i < 5; i++) {
+        mySynth.addVoice(new PianoVoice());
+    }
+    mySynth.clearSounds();
+    mySynth.addSound(new PianoSound());
 }
 
 MePianoAudioProcessor::~MePianoAudioProcessor()
@@ -95,6 +101,10 @@ void MePianoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    juce::ignoreUnused(samplesPerBlock);
+    lastSampleRate = sampleRate;
+    mySynth.setCurrentPlaybackSampleRate(lastSampleRate);
+
 }
 
 void MePianoAudioProcessor::releaseResources()
@@ -150,6 +160,8 @@ void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+    buffer.clear();
+    mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);

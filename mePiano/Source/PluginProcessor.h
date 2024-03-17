@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Piano.h"
 
 //==============================================================================
 /**
@@ -54,6 +55,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    
+    juce::Synthesiser mySynth;
+    PianoVoice* myVoice;
+
+    double lastSampleRate;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MePianoAudioProcessor)
 };
