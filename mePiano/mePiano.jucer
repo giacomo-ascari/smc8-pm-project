@@ -10,6 +10,8 @@
             file="Source/PluginProcessor.h"/>
       <FILE id="qlU4x5" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
+      <FILE id="KflqlY" name="Piano.cpp" compile="1" resource="0" file="Source/Piano.cpp"/>
+      <FILE id="gmiesK" name="Piano.h" compile="0" resource="0" file="Source/Piano.h"/>
       <FILE id="V7RAX1" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
   </MAINGROUP>
