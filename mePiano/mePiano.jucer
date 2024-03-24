@@ -14,7 +14,9 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="KflqlY" name="Piano.cpp" compile="1" resource="0" file="Source/Piano.cpp"/>
       <FILE id="gmiesK" name="Piano.h" compile="0" resource="0" file="Source/Piano.h"/>
+      <FILE id="CVTNEq" name="Delay.cpp" compile="1" resource="0" file="Source/Delay.cpp"/>
       <FILE id="V7RAX1" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="L2JpH6" name="Delay.h" compile="0" resource="0" file="Source/Delay.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

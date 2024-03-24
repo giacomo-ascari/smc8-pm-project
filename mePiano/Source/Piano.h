@@ -23,57 +23,11 @@ class Piano
 public:
 	Piano();
 	~Piano();
-	void playNote();
-private:
-
-};
-
-class PianoSound : public juce::SynthesiserSound
-{
-public:
-	bool appliesToNote(int midiNoteNUmber) { return true; }
-	bool appliesToChannel(int midiChannel) { return true; }
-};
-
-class PianoVoice : public juce::SynthesiserVoice
-{
-public:
-
-	bool canPlaySound(juce::SynthesiserSound* sound)
-	{
-		return dynamic_cast<PianoSound*>(sound) != nullptr;
-	}
-
-	void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition)
-	{
-		frequency = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-		std::cout << midiNoteNumber << std::endl;
-	}
-
-	void stopNote(float velocity, bool allowTailOff)
-	{
-		clearCurrentNote();
-	}
-
-	void renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
-	{
-
-	}
-
-	void pitchWheelMoved(int newPitchWheelValue)
-	{
-
-	}
-
-	void controllerMoved(int controllerNumber, int newControllerValue)
-	{
-
-	}
-
-
+	void renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
+	void setSampleRate(float sr) { sampleRate = sr; };
+	float getSampleRate() { return sampleRate; };
 
 private:
-	double level;
-	double frequency;
-
+	float sampleRate;
 };
+

@@ -637,6 +637,9 @@
     <ClCompile Include="..\..\Source\Piano.cpp">
       <Filter>mePiano\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Delay.cpp">
+      <Filter>mePiano\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\Documents\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.cpp">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>
     </ClCompile>
@@ -3226,6 +3229,9 @@
       <Filter>mePiano\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PluginEditor.h">
+      <Filter>mePiano\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Delay.h">
       <Filter>mePiano\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\Documents\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">

@@ -56,9 +56,7 @@ public:
 
 private:
     
-    juce::Synthesiser mySynth;
-    PianoVoice* myVoice;
-
+    Piano piano;
     double lastSampleRate;
     
     //==============================================================================
