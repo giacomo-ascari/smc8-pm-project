@@ -142,7 +142,8 @@
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginEditor.cpp"/>
     <ClCompile Include="..\..\Source\Piano.cpp"/>
-    <ClCompile Include="..\..\Source\Delay.cpp"/>
+    <ClCompile Include="..\..\Source\DSP.cpp"/>
+    <ClCompile Include="..\..\Source\Key.cpp"/>
     <ClCompile Include="..\..\..\..\..\Documents\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2552,10 +2553,12 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_midi_ci.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\PitchTables.h"/>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\Piano.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>
-    <ClInclude Include="..\..\Source\Delay.h"/>
+    <ClInclude Include="..\..\Source\Key.h"/>
+    <ClInclude Include="..\..\Source\DSP.h"/>
     <ClInclude Include="..\..\..\..\..\Documents\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\..\Documents\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\..\Documents\JUCE\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>

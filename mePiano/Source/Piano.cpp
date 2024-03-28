@@ -1,12 +1,14 @@
 #include "Piano.h"
 
 
-Piano::Piano() {
-	sampleRate = 48000.f;
+Piano::Piano(float sr) {
+	sampleRate = sr;
+	testKey = new Key(sampleRate);
 }
 
-Piano::~Piano() {
-
+Piano::~Piano()
+{
+	delete testKey;
 }
 
 void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -26,6 +28,11 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 			juce::MidiMessage msg = metadata.getMessage();
 			DBG(msg.getDescription());
 
+			if (msg.isNoteOn()) {
+				testKey->press(msg.getNoteNumber(), msg.getVelocity());
+				DBG(msg.getNoteNumber());
+			}
+			
 		}
 		// for (const MidiMessageMetadata metadata : midiBuffer)
 		// if (metadata.numBytes == 3)
@@ -42,13 +49,20 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		DBG("nc" + std::to_string(numChannels));
 		DBG("ns" + std::to_string(numSamples));
 	}
+
+
+
 	for (int i = 0; i < numSamples; i++)
 	{
 
 		float x = (float)time / sampleRate;
 
-		float val = 0.1 * std::sin(juce::MathConstants<float>::twoPi * 440.f * x);
+		//float val = 0.1 * std::sin(juce::MathConstants<float>::twoPi * 440.f * x);
+		float val = testKey->process();
 
+
+		if (val >= 1.f) val = 1.f;
+		else if (val < +-1.f) val = -1.f;
 
 		for (int c = 0; c < numChannels; c++)
 		{

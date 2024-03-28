@@ -27,6 +27,7 @@ MePianoAudioProcessor::MePianoAudioProcessor()
 
 MePianoAudioProcessor::~MePianoAudioProcessor()
 {
+    delete piano;
 }
 
 //==============================================================================
@@ -98,7 +99,7 @@ void MePianoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     // initialisation that you need..
     juce::ignoreUnused(samplesPerBlock);
     lastSampleRate = sampleRate;
-    piano.setSampleRate(lastSampleRate);
+    piano = new Piano(lastSampleRate);
 
 }
 
@@ -143,7 +144,7 @@ void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
     
-    piano.renderNextBlock(buffer, midiMessages);
+    piano->renderNextBlock(buffer, midiMessages);
     
     
 }

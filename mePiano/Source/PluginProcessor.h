@@ -56,7 +56,7 @@ public:
 
 private:
     
-    Piano piano;
+    Piano* piano;
     double lastSampleRate;
     
     //==============================================================================

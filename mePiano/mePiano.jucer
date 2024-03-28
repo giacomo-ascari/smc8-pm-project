@@ -6,6 +6,7 @@
               pluginManufacturer="giacomoAscari">
   <MAINGROUP id="bvNEbz" name="mePiano">
     <GROUP id="{EBF4075B-70B6-E442-BEEF-4B27D529BFDC}" name="Source">
+      <FILE id="M7E4lH" name="PitchTables.h" compile="0" resource="0" file="Source/PitchTables.h"/>
       <FILE id="zAdbWd" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="Jh1NzO" name="PluginProcessor.h" compile="0" resource="0"
@@ -14,9 +15,11 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="KflqlY" name="Piano.cpp" compile="1" resource="0" file="Source/Piano.cpp"/>
       <FILE id="gmiesK" name="Piano.h" compile="0" resource="0" file="Source/Piano.h"/>
-      <FILE id="CVTNEq" name="Delay.cpp" compile="1" resource="0" file="Source/Delay.cpp"/>
+      <FILE id="CVTNEq" name="DSP.cpp" compile="1" resource="0" file="Source/DSP.cpp"/>
       <FILE id="V7RAX1" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="L2JpH6" name="Delay.h" compile="0" resource="0" file="Source/Delay.h"/>
+      <FILE id="fvkxN6" name="Key.cpp" compile="1" resource="0" file="Source/Key.cpp"/>
+      <FILE id="Wy9py6" name="Key.h" compile="0" resource="0" file="Source/Key.h"/>
+      <FILE id="L2JpH6" name="DSP.h" compile="0" resource="0" file="Source/DSP.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>
