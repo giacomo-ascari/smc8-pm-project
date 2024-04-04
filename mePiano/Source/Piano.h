@@ -2,7 +2,9 @@
 
 #include <JuceHeader.h>
 #include "Key.h"
-#include "DSP.h"
+
+#define VOICE_COUNT 20
+#define NOTE_COUNT 85
 
 class Piano
 {
@@ -10,8 +12,11 @@ public:
 	Piano(float sr);
 	~Piano();
 	void renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
+	Key** getVoices(int &len);
+	
 private:
 	float sampleRate;
-	Key* testKey;
+	int noteToVoice[NOTE_COUNT];
+	Key* voices[VOICE_COUNT]; // equivalent to voices
 };
 

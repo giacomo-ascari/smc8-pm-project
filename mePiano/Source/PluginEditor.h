@@ -14,7 +14,7 @@
 //==============================================================================
 /**
 */
-class MePianoAudioProcessorEditor  : public juce::AudioProcessorEditor
+class MePianoAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
     MePianoAudioProcessorEditor (MePianoAudioProcessor&);
@@ -28,6 +28,10 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     MePianoAudioProcessor& audioProcessor;
+
+    void timerCallback() final {
+        repaint();
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MePianoAudioProcessorEditor)
 };

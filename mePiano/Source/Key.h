@@ -1,8 +1,10 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "DSP.h"
 #include "PitchTables.h"
+#include "String.h"
+
+#define MAX_STRINGS_COUNT 3
 
 enum KeyState
 {
@@ -12,46 +14,29 @@ enum KeyState
 	RELEASING
 };
 
+// sustain doesn't exist ofc
+
 class Key 
 {
 public:
-	Key(float sr);
+	Key(float sampleRate);
 	~Key();
-	void press(int midiNoteNumber, float v);
+	void tune(int midiNoteNumber);
+	void press(float velocity);
+	void dampen();
 	float process();
+	int getMidiNote();
+	KeyState getState();
+	uint32_t getTime();
+	int getStrings();
 
 private:
 	KeyState state;
 	uint32_t time;
-	float pitch;
+	int activeStrings;
+	int activeMidiNote;
+	float activeVelocity;
 	float sampleRate;
-	// damn man, find a better way please
-	// string 1
-	Delay s1FrontTopSegment;
-	Delay s1FrontBotSegment;
-	Delay s1BackSegment;
-	// string 2
-	Delay s2FrontTopSegment;
-	Delay s2FrontBotSegment;
-	Delay s2BackSegment;
-	// string 3
-	Delay s3FrontTopSegment;
-	Delay s3FrontBotSegment;
-	Delay s3BackSegment;
-};
-
-class String
-{
-public:
-	String();
-	~String();
-	void setLength(float len);
-	void set
-	float process();
-
-private:
-	Delay frontTopSegment;
-	Delay frontBotSegment;
-	Delay backSegment;
-
+	String* strings[MAX_STRINGS_COUNT];
+	float pitches[MAX_STRINGS_COUNT];
 };
