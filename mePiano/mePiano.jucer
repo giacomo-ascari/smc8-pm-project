@@ -6,6 +6,7 @@
               pluginManufacturer="giacomoAscari">
   <MAINGROUP id="bvNEbz" name="mePiano">
     <GROUP id="{EBF4075B-70B6-E442-BEEF-4B27D529BFDC}" name="Source">
+      <FILE id="AJcv1N" name="IR.wav" compile="0" resource="1" file="Source/IR.wav"/>
       <GROUP id="{CBF1A318-C038-D1FE-9860-D9FC213BFE29}" name="DSP">
         <FILE id="CVTNEq" name="Delay.cpp" compile="1" resource="0" file="Source/Delay.cpp"/>
         <FILE id="L2JpH6" name="Delay.h" compile="0" resource="0" file="Source/Delay.h"/>

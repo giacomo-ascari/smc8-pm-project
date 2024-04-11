@@ -14,6 +14,6 @@ public:
 protected:
 	float sampleRate;
 	Delay frontTopSegment, frontBotSegment, backSegment;
-	Filter lpfTop, lpfBot, dampener;
+	Filter filterTop, filterBot, dampener;
 	float gain;
 };

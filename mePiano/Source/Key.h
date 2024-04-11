@@ -37,6 +37,8 @@ private:
 	int activeMidiNote;
 	float activeVelocity;
 	float sampleRate;
+	bool dampenWorks;
 	String* strings[MAX_STRINGS_COUNT];
 	float pitches[MAX_STRINGS_COUNT];
+	Filter* excitationFilter;
 };

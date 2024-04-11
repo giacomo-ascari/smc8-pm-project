@@ -13,15 +13,9 @@
 String::String(float sr)
 {
 	sampleRate = sr;
-	lpfTop.configure(LPF, sampleRate, 10000.f, 1.f);
-	lpfBot.configure(LPF, sampleRate, 10000.f, 1.f);
-	dampener.configure(LPF, sampleRate, 1000.f, 0.05f);
-	if (lpfTop.isStable()) {
-		DBG("STABLE");
-	}
-	else {
-		DBG("UNSTABLE!!!");
-	}
+	filterTop.configure(LPF, sampleRate, 15000.f, 0.8f);
+	filterBot.configure(APF, sampleRate, 15000.f, 0.7f);
+	dampener.configure(LPF, sampleRate, 100.f, 0.7071f);
 	gain = -0.995f; // -0.995
 	setSize(440.f, 0.2f);
 }
@@ -66,11 +60,11 @@ float String::process(String** strings, int stringsCount, float x, bool dampen)
 
 		// Get output of first delay and process it through the termination
 		// Get the ouput of the termination
-		middle[i] = string->lpfTop.process(string->gain * string->frontTopSegment.getSample());
+		middle[i] = string->filterTop.process(string->gain * string->frontTopSegment.getSample());
 		output += middle[i];
 	}
 
-	// Rescale the simpathetic thing
+	// Rescale the output thing
 	output /= stringsCount;
 
 	// Simulate the second part of the model
@@ -78,14 +72,30 @@ float String::process(String** strings, int stringsCount, float x, bool dampen)
 	for (int i = 0; i < stringsCount; i++)
 	{
 		String* string = strings[i];
+		
+		// If more than one string
+		// Sum sym to result of the top termination
+		// read the simpathetic of the other string and rescaleit
+		if (stringsCount == 1)
+		{
+			string->backSegment.pushSample(middle[i]);
+		}
+		else
+		{
+			float sympathetic = 0;
+			for (int j = 0; j < stringsCount; j++)
+			{
+				if (j != i) sympathetic += middle[i];
+			}
+			sympathetic /= (stringsCount - 1);
+			string->backSegment.pushSample(0.7f * middle[i] + 0.3f * sympathetic);
+		}
 
-		// Sum xSym to result of the top termination
-		// maybe mix the two???
-
-		string->backSegment.pushSample(0.67f * middle[i] + 0.33f * output);
+		
+		
 
 		// Get output of the bottom termination and feed to the third delay
-		string->frontBotSegment.pushSample(string->lpfBot.process(string->gain * string->backSegment.getSample()));
+		string->frontBotSegment.pushSample(string->filterBot.process(string->gain * string->backSegment.getSample()));
 		//frontBotSegment.pushSample(gain * backSegment.getSample());
 	}
 

@@ -7,12 +7,16 @@ Key::Key(float sampleRate)
 	activeStrings = 0;
 	activeMidiNote = 0;
 	activeVelocity = 0;
+	dampenWorks = true;
 	this->sampleRate = sampleRate;
 
 	for (int i = 0; i < MAX_STRINGS_COUNT; i++)
 	{
 		strings[i] = new String(sampleRate);
 	}
+
+	excitationFilter = new Filter();
+	excitationFilter->configure(0.1, 0.9, 0, 0, 0);
 
 	tune(60);
 }
@@ -23,6 +27,7 @@ Key::~Key()
 	{
 		delete strings[i];
 	}
+	delete excitationFilter;
 }
 
 void Key::tune(int midiNoteNumber)
@@ -30,13 +35,14 @@ void Key::tune(int midiNoteNumber)
 
 	// get data and update private class members
 	activeMidiNote = midiNoteNumber;
-	PitchTable::getPitches(activeMidiNote, pitches);
+	//PitchTable::getPitches(activeMidiNote, pitches);
+	PitchTable::getMeasuredPitches(activeMidiNote, pitches, dampenWorks);
 	activeStrings = PitchTable::getStringsCount(midiNoteNumber);
 
 	// tune
 	for (int i = 0; i < activeStrings; i++)
 	{
-		strings[i]->setSize(pitches[i], 0.2);
+		strings[i]->setSize(pitches[i], 0.1721);
 	}
 }
 
@@ -55,6 +61,8 @@ void Key::dampen()
 
 float Key::process()
 {
+	static juce::Random rand;
+
 	if (state != IDLE)
 	{
 		float y = 0.f;
@@ -72,15 +80,14 @@ float Key::process()
 			float hitDur = 0.001f * sampleRate;
 			float bounceDur = (0.25f / pitches[0]) * sampleRate; // fourth of wave period
 
-			if (time == 0) {
-				DBG(amplitude);
-				DBG(hitDur);
-				//DBG(bounceDur);
-			}
+			//if (time == 0) {
+			//	DBG(amplitude);
+			//	DBG(hitDur);
+			//}
 
 			if (time < hitDur)
 			{
-				excitation = sin(juce::MathConstants<float>::twoPi * 1.f / hitDur * sampleRate * time);
+				excitation = sin(juce::MathConstants<float>::twoPi * 1.f / hitDur * sampleRate * time) + rand.nextFloat() * 0.1;
 			}
 			else if (time < hitDur + bounceDur)
 			{
@@ -91,15 +98,16 @@ float Key::process()
 				excitation = 0;
 				state = DECAYING;
 			}
+
+			excitation *= amplitude;
 		}
 		else
 		{
 			excitation = 0;
 		}
-		// depending statee and time
-		// change excitation
+		excitation = excitationFilter->process(excitation);
 
-		bool dampen = state == RELEASING || state == IDLE;
+		bool dampen = (state == RELEASING || state == IDLE) && dampenWorks;
 
 		y = String::process(strings, activeStrings, excitation, dampen);
 

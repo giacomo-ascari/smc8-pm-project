@@ -1,9 +1,9 @@
 #include "Piano.h"
 
 
-Piano::Piano(float sr) {
+Piano::Piano(float sampleRate, float samplesPerBlock) {
 	
-	sampleRate = sr;
+	this->sampleRate = sampleRate;
 
 	for (int i = 0; i < VOICE_COUNT; i++)
 	{
@@ -13,6 +13,26 @@ Piano::Piano(float sr) {
 	{
 		noteToVoice[i] = -1;
 	}
+
+	reverb = new juce::dsp::Convolution();
+	/*irFile = juce::File::getCurrentWorkingDirectory()
+		.getParentDirectory()
+		.getParentDirectory()
+		.getChildFile("Source/IR.wav");*/
+	irFile = juce::File::getCurrentWorkingDirectory().getChildFile("IR.wav");
+	spec = juce::dsp::ProcessSpec();
+	spec.sampleRate = sampleRate;
+	spec.maximumBlockSize = samplesPerBlock;
+	spec.numChannels = 2;
+	reverb->reset();
+	reverb->loadImpulseResponse(
+			irFile,
+			juce::dsp::Convolution::Stereo::no,
+			juce::dsp::Convolution::Trim::yes,
+			(size_t)0,
+			juce::dsp::Convolution::Normalise::no
+		);
+	reverb->prepare(spec);
 }
 
 Piano::~Piano()
@@ -21,6 +41,7 @@ Piano::~Piano()
 	{
 		delete voices[i];
 	}
+	delete reverb;
 }
 
 void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -99,8 +120,6 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		DBG("ns" + std::to_string(numSamples));
 	}
 
-
-
 	for (int i = 0; i < numSamples; i++)
 	{
 
@@ -114,7 +133,7 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 			y += voices[i]->process();
 		}
 
-		y /= 5;
+		y /= 8;
 
 		if (y >= 1.f) y = 1.f;
 		else if (y < +-1.f) y = -1.f;
@@ -126,6 +145,10 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 
 		time++;
 	}
+
+	juce::dsp::AudioBlock<float> block { buffer };
+	reverb->process(juce::dsp::ProcessContextReplacing<float>(block));
+
 	blockProc++;
 }
 

@@ -19,7 +19,8 @@ enum FilterTypes {
 	LPF, // low-pass
 	BPF, // band-pass
 	BSF, // band-stop
-	APF  // all-pass
+	APF, // all-pass
+	BYP  // bypass
 };
 
 class Filter
@@ -29,7 +30,7 @@ public:
 	~Filter();
 	float process(float x);
 	void configure(FilterTypes type, float sampleRate, float f0, float q_bw);
-	bool isStable();
+	void configure(float b0, float b1, float b2, float a1, float a2);
 
 private:
 	float sampleRate;

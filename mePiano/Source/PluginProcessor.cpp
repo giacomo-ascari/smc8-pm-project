@@ -99,8 +99,7 @@ void MePianoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     // initialisation that you need..
     juce::ignoreUnused(samplesPerBlock);
     lastSampleRate = sampleRate;
-    piano = new Piano(lastSampleRate);
-
+    piano = new Piano(sampleRate, samplesPerBlock);
 }
 
 void MePianoAudioProcessor::releaseResources()
@@ -145,8 +144,6 @@ void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     // interleaved by keeping the same state.
     
     piano->renderNextBlock(buffer, midiMessages);
-    
-    
 }
 
 //==============================================================================
