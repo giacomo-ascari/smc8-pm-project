@@ -14,7 +14,7 @@
 //==============================================================================
 /**
 */
-class MePianoAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
+class MePianoAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer, public juce::Slider::Listener
 {
 public:
     MePianoAudioProcessorEditor (MePianoAudioProcessor&);
@@ -28,10 +28,21 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     MePianoAudioProcessor& audioProcessor;
+    juce::TextButton noteButton{ "Play note" };
+    juce::Slider velocitySlider;
+    juce::Label  velocityLabel;
+    juce::Slider noteSlider;
+    juce::Label  noteLabel;
+    juce::Image image;
+
+    void playNote();
 
     void timerCallback() final {
-        repaint();
+        AudioProcessorEditor::repaint();
     }
+
+    void sliderValueChanged(juce::Slider* slider) override;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MePianoAudioProcessorEditor)
 };

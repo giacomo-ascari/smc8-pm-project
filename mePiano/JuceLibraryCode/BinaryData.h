@@ -8,11 +8,14 @@
 
 namespace BinaryData
 {
-    extern const char*   IR_wav;
-    const int            IR_wavSize = 96044;
+    extern const char*   background_png;
+    const int            background_pngSize = 455111;
+
+    extern const char*   ir_wav;
+    const int            ir_wavSize = 96044;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 1;
+    const int namedResourceListSize = 2;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

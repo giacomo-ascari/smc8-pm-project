@@ -15,6 +15,31 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+
+    image = juce::ImageFileFormat::loadFrom(BinaryData::background_png, BinaryData::background_pngSize);
+
+    addAndMakeVisible(noteButton);
+    noteButton.onClick = [&]() {
+        DBG("i-ve been clicked");
+        playNote();
+    };
+
+    addAndMakeVisible(velocitySlider);
+    velocitySlider.setRange(0, 127, 1);
+    velocitySlider.addListener(this);
+
+    addAndMakeVisible(velocityLabel);
+    velocityLabel.setText("Velocity", juce::dontSendNotification);
+    velocityLabel.attachToComponent(&velocitySlider, true);
+
+    addAndMakeVisible(noteSlider);
+    noteSlider.setRange(33, 117, 1);
+    noteSlider.addListener(this);
+
+    addAndMakeVisible(noteLabel);
+    noteLabel.setText("Note #", juce::dontSendNotification);
+    noteLabel.attachToComponent(&noteSlider, true);
+
     setSize (600, 450);
     startTimerHz(10);
 }
@@ -25,23 +50,28 @@ MePianoAudioProcessorEditor::~MePianoAudioProcessorEditor()
 }
 
 //==============================================================================
-void MePianoAudioProcessorEditor::paint (juce::Graphics& g)
+void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    //g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    g.drawImage(image, 0, 0, 600, 450, 0, 0, 600, 450);
 
     g.setColour(juce::Colours::white);
-    g.setFont (15.0f);
+    g.setFont(15.0f);
     //g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 
     int voiceCount = 0;
     Key** voices = audioProcessor.piano->getVoices(voiceCount);
 
-    g.drawText(std::to_string(voiceCount), 200, 0, 100, 100, juce::Justification::centred, true);
+    juce::String text;
+
+    text = "Voices (max. " + std::to_string(voiceCount) + ")";
+    
+    g.drawText(text, 20, 15, 200, 100, juce::Justification::topLeft, true);
 
     for (int i = 0; i < voiceCount; i++)
     {
-        juce::String text = "v #" + std::to_string(i);
+        text = std::to_string(i);
         text = text + " " + std::to_string(voices[i]->getMidiNote());
         text = text + " " + std::to_string(voices[i]->getTime() / audioProcessor.getSampleRate());
         text = text + " " + std::to_string(voices[i]->getStrings());
@@ -59,12 +89,29 @@ void MePianoAudioProcessorEditor::paint (juce::Graphics& g)
             g.setColour(juce::Colours::grey);
             break;
         }
-        g.drawText(text, 20, 30+i * 20, 200, 100, juce::Justification::topLeft, true);
+        g.drawText(text, 20, 40+i * 20, 200, 100, juce::Justification::topLeft, true);
     }
+}
+
+void MePianoAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
+{
+    //if (slider == &velocitySlider)
+    //    durationSlider.setValue(1.0 / velocitySlider.getValue(), juce::dontSendNotification);
 }
 
 void MePianoAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+    int w = 300;
+    int h = 25;
+    int p = 15;
+    noteButton.setBounds(getWidth() - w - p, p, w, h);
+    velocitySlider.setBounds(getWidth() - w - p, 2 * p + h, w, h);
+    noteSlider.setBounds(getWidth() - w - p, 3*p + 2*h, w, h);
+}
+
+void MePianoAudioProcessorEditor::playNote()
+{
+    //piano
 }

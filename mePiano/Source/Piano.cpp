@@ -15,23 +15,19 @@ Piano::Piano(float sampleRate, float samplesPerBlock) {
 	}
 
 	reverb = new juce::dsp::Convolution();
-	/*irFile = juce::File::getCurrentWorkingDirectory()
-		.getParentDirectory()
-		.getParentDirectory()
-		.getChildFile("Source/IR.wav");*/
-	irFile = juce::File::getCurrentWorkingDirectory().getChildFile("IR.wav");
 	spec = juce::dsp::ProcessSpec();
 	spec.sampleRate = sampleRate;
 	spec.maximumBlockSize = samplesPerBlock;
 	spec.numChannels = 2;
 	reverb->reset();
 	reverb->loadImpulseResponse(
-			irFile,
-			juce::dsp::Convolution::Stereo::no,
-			juce::dsp::Convolution::Trim::yes,
-			(size_t)0,
-			juce::dsp::Convolution::Normalise::no
-		);
+		BinaryData::ir_wav,
+		BinaryData::ir_wavSize,
+		juce::dsp::Convolution::Stereo::no,
+		juce::dsp::Convolution::Trim::yes,
+		(size_t)0,
+		juce::dsp::Convolution::Normalise::no
+	);
 	reverb->prepare(spec);
 }
 
@@ -50,7 +46,6 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 
 	int numSamples = buffer.getNumSamples();
 	int numChannels = buffer.getNumChannels();
-	
 
 	if (!midiMessages.isEmpty())
 	{

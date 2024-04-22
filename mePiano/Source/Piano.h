@@ -19,7 +19,6 @@ private:
 	int noteToVoice[NOTE_COUNT];
 	Key* voices[VOICE_COUNT]; // equivalent to voices
 	juce::dsp::Convolution* reverb;
-	juce::File irFile;
 	juce::dsp::ProcessSpec spec;
 };
 
