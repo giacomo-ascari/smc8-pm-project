@@ -33,6 +33,8 @@ private:
     juce::Label  velocityLabel;
     juce::Slider noteSlider;
     juce::Label  noteLabel;
+    juce::Slider durationSlider;
+    juce::Label  durationLabel;
     juce::Image image;
 
     void playNote();

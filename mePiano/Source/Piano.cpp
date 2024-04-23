@@ -72,7 +72,6 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 						{
 							if (voices[i]->getTime() > voices[result]->getTime()) result = i;
 						}
-
 						
 						// update the old note pointing to the voice
 						for (int i = 1; i < NOTE_COUNT; i++)

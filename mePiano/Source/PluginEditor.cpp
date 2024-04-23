@@ -20,7 +20,6 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
 
     addAndMakeVisible(noteButton);
     noteButton.onClick = [&]() {
-        DBG("i-ve been clicked");
         playNote();
     };
 
@@ -39,6 +38,14 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     addAndMakeVisible(noteLabel);
     noteLabel.setText("Note #", juce::dontSendNotification);
     noteLabel.attachToComponent(&noteSlider, true);
+
+    addAndMakeVisible(durationSlider);
+    durationSlider.setRange(0.2, 5, 0.1);
+    durationSlider.addListener(this);
+
+    addAndMakeVisible(durationLabel);
+    durationLabel.setText("Dur. (s)", juce::dontSendNotification);
+    durationLabel.attachToComponent(&durationSlider, true);
 
     setSize (600, 450);
     startTimerHz(10);
@@ -108,10 +115,11 @@ void MePianoAudioProcessorEditor::resized()
     int p = 15;
     noteButton.setBounds(getWidth() - w - p, p, w, h);
     velocitySlider.setBounds(getWidth() - w - p, 2 * p + h, w, h);
-    noteSlider.setBounds(getWidth() - w - p, 3*p + 2*h, w, h);
+    noteSlider.setBounds(getWidth() - w - p, 3 * p + 2 * h, w, h);
+    durationSlider.setBounds(getWidth() - w - p, 4 * p + 3 * h, w, h);
 }
 
 void MePianoAudioProcessorEditor::playNote()
 {
-    //piano
+    audioProcessor.addArtificialMidi(velocitySlider.getValue(), noteSlider.getValue(), durationSlider.getValue()*1000);
 }

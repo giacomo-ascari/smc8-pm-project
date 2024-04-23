@@ -57,6 +57,7 @@ void Key::press(float velocity)
 void Key::dampen()
 {
 	state = RELEASING;
+	DBG("dampen invoked for key nn " << activeMidiNote);
 }
 
 float Key::process()

@@ -54,11 +54,13 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    void addArtificialMidi(float velocity, int noteNumber, int duration);
     Piano* piano;
 
 private:
     
     double lastSampleRate;
+    juce::MidiBuffer artificialMidi;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MePianoAudioProcessor)

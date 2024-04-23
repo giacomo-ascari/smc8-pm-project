@@ -100,6 +100,7 @@ void MePianoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     juce::ignoreUnused(samplesPerBlock);
     lastSampleRate = sampleRate;
     piano = new Piano(sampleRate, samplesPerBlock);
+
 }
 
 void MePianoAudioProcessor::releaseResources()
@@ -134,6 +135,24 @@ bool MePianoAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 }
 #endif
 
+void MePianoAudioProcessor::addArtificialMidi(float velocity, int noteNumber, int duration)
+{
+    juce::uint8 v = velocity;
+    if (v > 127) v = 127;
+
+    juce::uint8 n = noteNumber;
+    if (n > 127) n = 127;
+
+    juce::MidiMessage onMessage = juce::MidiMessage::noteOn(1, n, v);
+    artificialMidi.addEvent(onMessage, 0);
+
+    static juce::MidiMessage offMessage = juce::MidiMessage::noteOff(1, n);
+
+    juce::Timer::callAfterDelay(duration, [&]() {
+        artificialMidi.addEvent(offMessage, 0);
+    });
+}
+
 void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     // This is the place where you'd normally do the guts of your plugin's
@@ -142,6 +161,19 @@ void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+
+    if (!artificialMidi.isEmpty())
+    {
+        for (juce::MidiBufferIterator iter = artificialMidi.begin(); iter != artificialMidi.end(); iter++)
+        {
+            juce::MidiMessageMetadata metadata = *iter;
+            std::string s = ">>>" + std::to_string(metadata.numBytes);
+            juce::MidiMessage msg = metadata.getMessage();
+
+            midiMessages.addEvent(msg, midiMessages.getLastEventTime());
+        }
+    }
+    artificialMidi.clear();
     
     piano->renderNextBlock(buffer, midiMessages);
 }
