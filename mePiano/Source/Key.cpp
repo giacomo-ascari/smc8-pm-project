@@ -1,6 +1,6 @@
 #include "Key.h"
 
-Key::Key(float sampleRate)
+Key::Key(float sampleRate) : exciter(sampleRate)
 {
 	state = IDLE;
 	time = 0;
@@ -8,15 +8,13 @@ Key::Key(float sampleRate)
 	activeMidiNote = 0;
 	activeVelocity = 0;
 	dampenWorks = true;
+	dampenRandomizable = true;
 	this->sampleRate = sampleRate;
 
 	for (int i = 0; i < MAX_STRINGS_COUNT; i++)
 	{
 		strings[i] = new String(sampleRate);
 	}
-
-	excitationFilter = new Filter();
-	excitationFilter->configure(0.1, 0.9, 0, 0, 0);
 
 	tune(60);
 }
@@ -27,7 +25,6 @@ Key::~Key()
 	{
 		delete strings[i];
 	}
-	delete excitationFilter;
 }
 
 void Key::tune(int midiNoteNumber)
@@ -44,6 +41,9 @@ void Key::tune(int midiNoteNumber)
 	{
 		strings[i]->setSize(pitches[i], 0.1721);
 	}
+
+	// for the unreliability feature
+	dampenRandomizable = dampenWorks;
 }
 
 void Key::press(float velocity)
@@ -52,12 +52,19 @@ void Key::press(float velocity)
 	time = 0;
 	state = ATTACKING;
 	activeVelocity = velocity / 127.f;
+
+	// dampener unreliability 10%
+	if (dampenRandomizable) {
+		if (reliabilityRand.nextFloat() < 0.5) dampenWorks = false;
+		else dampenWorks = true;
+	}
+
+	exciter.setHammer(pitches[0], activeVelocity);
 }
 
 void Key::dampen()
 {
 	state = RELEASING;
-	DBG("dampen invoked for key nn " << activeMidiNote);
 }
 
 float Key::process()
@@ -69,46 +76,13 @@ float Key::process()
 		float y = 0.f;
 		float excitation = 0.f;
 
-		/*
-		att = 0.001 * (1 - velocity);
-		rel = 4/string0Pitch(key);
-		exc = (0.5 + velocity/2) * en.ar(att, rel, trigger);
-		*/
+		excitation = exciter.process();
 
-		if (state == ATTACKING)
-		{
-			float amplitude = (1.f + activeVelocity) * 0.5f; // from 0.5 to 1
-			float hitDur = 0.001f * sampleRate;
-			float bounceDur = (0.25f / pitches[0]) * sampleRate; // fourth of wave period
+		//if (exciter.isAttacking()) state = ATTACKING;
+		//else if (exciter.isDecaying()) state = DECAYING;
+		//else state = RELEASING;
 
-			//if (time == 0) {
-			//	DBG(amplitude);
-			//	DBG(hitDur);
-			//}
-
-			if (time < hitDur)
-			{
-				excitation = sin(juce::MathConstants<float>::twoPi * 1.f / hitDur * sampleRate * time) + rand.nextFloat() * 0.1;
-			}
-			else if (time < hitDur + bounceDur)
-			{
-				excitation = 1 - sin(juce::MathConstants<float>::twoPi * 1.f / bounceDur * sampleRate * (time - hitDur));
-			}
-			else
-			{
-				excitation = 0;
-				state = DECAYING;
-			}
-
-			excitation *= amplitude;
-		}
-		else
-		{
-			excitation = 0;
-		}
-		excitation = excitationFilter->process(excitation);
-
-		bool dampen = (state == RELEASING || state == IDLE) && dampenWorks;
+		bool dampen = (state == RELEASING) && dampenWorks;
 
 		y = String::process(strings, activeStrings, excitation, dampen);
 

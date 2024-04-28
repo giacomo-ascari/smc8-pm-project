@@ -19,12 +19,20 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     image = juce::ImageFileFormat::loadFrom(BinaryData::background_png, BinaryData::background_pngSize);
 
     addAndMakeVisible(noteButton);
+    noteButton.setTriggeredOnMouseDown(false);
     noteButton.onClick = [&]() {
-        playNote();
+        // released
+        audioProcessor.addArtificialMidi(velocitySlider.getValue(), noteSlider.getValue(), false);
+    };
+    noteButton.onStateChange = [&]() {
+        if (noteButton.isDown()) {
+            // pressed
+            audioProcessor.addArtificialMidi(velocitySlider.getValue(), noteSlider.getValue(), true);
+        }
     };
 
     addAndMakeVisible(velocitySlider);
-    velocitySlider.setRange(0, 127, 1);
+    velocitySlider.setRange(1, 127, 1);
     velocitySlider.addListener(this);
 
     addAndMakeVisible(velocityLabel);
@@ -38,14 +46,6 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     addAndMakeVisible(noteLabel);
     noteLabel.setText("Note #", juce::dontSendNotification);
     noteLabel.attachToComponent(&noteSlider, true);
-
-    addAndMakeVisible(durationSlider);
-    durationSlider.setRange(0.2, 5, 0.1);
-    durationSlider.addListener(this);
-
-    addAndMakeVisible(durationLabel);
-    durationLabel.setText("Dur. (s)", juce::dontSendNotification);
-    durationLabel.attachToComponent(&durationSlider, true);
 
     setSize (600, 450);
     startTimerHz(10);
@@ -63,7 +63,7 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
     //g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.drawImage(image, 0, 0, 600, 450, 0, 0, 600, 450);
 
-    g.setColour(juce::Colours::white);
+   
     g.setFont(15.0f);
     //g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 
@@ -71,10 +71,14 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
     Key** voices = audioProcessor.piano->getVoices(voiceCount);
 
     juce::String text;
-
-    text = "Voices (max. " + std::to_string(voiceCount) + ")";
     
+    text = "Voices (max. " + std::to_string(voiceCount) + ")";
+    g.setColour(juce::Colours::white);
     g.drawText(text, 20, 15, 200, 100, juce::Justification::topLeft, true);
+
+    text = "# / note / time / strings";
+    g.setColour(juce::Colours::grey);
+    g.drawText(text, 20, 40, 200, 100, juce::Justification::topLeft, true);
 
     for (int i = 0; i < voiceCount; i++)
     {
@@ -96,7 +100,7 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
             g.setColour(juce::Colours::grey);
             break;
         }
-        g.drawText(text, 20, 40+i * 20, 200, 100, juce::Justification::topLeft, true);
+        g.drawText(text, 20, 59+i * 19, 200, 100, juce::Justification::topLeft, true);
     }
 }
 
@@ -116,10 +120,4 @@ void MePianoAudioProcessorEditor::resized()
     noteButton.setBounds(getWidth() - w - p, p, w, h);
     velocitySlider.setBounds(getWidth() - w - p, 2 * p + h, w, h);
     noteSlider.setBounds(getWidth() - w - p, 3 * p + 2 * h, w, h);
-    durationSlider.setBounds(getWidth() - w - p, 4 * p + 3 * h, w, h);
-}
-
-void MePianoAudioProcessorEditor::playNote()
-{
-    audioProcessor.addArtificialMidi(velocitySlider.getValue(), noteSlider.getValue(), durationSlider.getValue()*1000);
 }

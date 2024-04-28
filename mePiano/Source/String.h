@@ -2,6 +2,7 @@
 
 #include "Delay.h"
 #include "Filter.h"
+#include "Biquad.h"
 
 class String
 {

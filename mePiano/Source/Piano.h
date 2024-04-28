@@ -3,7 +3,7 @@
 #include <JuceHeader.h>
 #include "Key.h"
 
-#define VOICE_COUNT 20
+#define VOICE_COUNT 16
 #define NOTE_COUNT 85
 
 class Piano

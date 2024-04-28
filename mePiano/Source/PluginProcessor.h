@@ -54,7 +54,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void addArtificialMidi(float velocity, int noteNumber, int duration);
+    void addArtificialMidi(float velocity, int noteNumber, bool noteOn);
     Piano* piano;
 
 private:

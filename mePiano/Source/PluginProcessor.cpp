@@ -135,7 +135,7 @@ bool MePianoAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 }
 #endif
 
-void MePianoAudioProcessor::addArtificialMidi(float velocity, int noteNumber, int duration)
+void MePianoAudioProcessor::addArtificialMidi(float velocity, int noteNumber, bool noteOn)
 {
     juce::uint8 v = velocity;
     if (v > 127) v = 127;
@@ -143,14 +143,16 @@ void MePianoAudioProcessor::addArtificialMidi(float velocity, int noteNumber, in
     juce::uint8 n = noteNumber;
     if (n > 127) n = 127;
 
-    juce::MidiMessage onMessage = juce::MidiMessage::noteOn(1, n, v);
-    artificialMidi.addEvent(onMessage, 0);
-
-    static juce::MidiMessage offMessage = juce::MidiMessage::noteOff(1, n);
-
-    juce::Timer::callAfterDelay(duration, [&]() {
+    if (noteOn)
+    {
+        juce::MidiMessage onMessage = juce::MidiMessage::noteOn(1, n, v);
+        artificialMidi.addEvent(onMessage, 0);
+    }
+    else
+    {
+        juce::MidiMessage offMessage = juce::MidiMessage::noteOff(1, n);
         artificialMidi.addEvent(offMessage, 0);
-    });
+    }
 }
 
 void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)

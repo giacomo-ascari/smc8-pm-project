@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "PitchTables.h"
 #include "String.h"
+#include "Exciter.h"
 
 #define MAX_STRINGS_COUNT 3
 
@@ -38,7 +39,9 @@ private:
 	float activeVelocity;
 	float sampleRate;
 	bool dampenWorks;
+	bool dampenRandomizable;
 	String* strings[MAX_STRINGS_COUNT];
 	float pitches[MAX_STRINGS_COUNT];
-	Filter* excitationFilter;
+	juce::Random reliabilityRand;
+	Exciter exciter;
 };

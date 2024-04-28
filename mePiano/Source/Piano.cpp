@@ -127,10 +127,18 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 			y += voices[i]->process();
 		}
 
-		y /= 8;
+		y /= 4;
 
-		if (y >= 1.f) y = 1.f;
-		else if (y < +-1.f) y = -1.f;
+		if (y >= 1.f)
+		{
+			DBG("clipping");
+			y = 1.f;
+		}
+		else if (y < -1.f)
+		{
+			DBG("clipping");
+			y = -1.f;
+		}
 
 		for (int c = 0; c < numChannels; c++)
 		{
@@ -140,8 +148,8 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		time++;
 	}
 
-	juce::dsp::AudioBlock<float> block { buffer };
-	reverb->process(juce::dsp::ProcessContextReplacing<float>(block));
+	//juce::dsp::AudioBlock<float> block { buffer };
+	//reverb->process(juce::dsp::ProcessContextReplacing<float>(block));
 
 	blockProc++;
 }

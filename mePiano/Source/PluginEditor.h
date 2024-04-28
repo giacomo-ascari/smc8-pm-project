@@ -14,7 +14,10 @@
 //==============================================================================
 /**
 */
-class MePianoAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer, public juce::Slider::Listener
+class MePianoAudioProcessorEditor :
+    public juce::AudioProcessorEditor,
+    private juce::Timer,
+    public juce::Slider::Listener
 {
 public:
     MePianoAudioProcessorEditor (MePianoAudioProcessor&);
@@ -33,11 +36,7 @@ private:
     juce::Label  velocityLabel;
     juce::Slider noteSlider;
     juce::Label  noteLabel;
-    juce::Slider durationSlider;
-    juce::Label  durationLabel;
     juce::Image image;
-
-    void playNote();
 
     void timerCallback() final {
         AudioProcessorEditor::repaint();
