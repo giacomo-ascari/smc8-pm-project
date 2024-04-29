@@ -70,7 +70,7 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
     int voiceCount = 0;
     Key** voices = audioProcessor.piano->getVoices(voiceCount);
 
-    juce::String text;
+    std::string text;
     
     text = "Voices (max. " + std::to_string(voiceCount) + ")";
     g.setColour(juce::Colours::white);
@@ -86,6 +86,7 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
         text = text + " " + std::to_string(voices[i]->getMidiNote());
         text = text + " " + std::to_string(voices[i]->getTime() / audioProcessor.getSampleRate());
         text = text + " " + std::to_string(voices[i]->getStrings());
+        text = text + " " + std::to_string(voices[i]->getLastValue());
         switch (voices[i]->getState()) {
         case ATTACKING:
             g.setColour(juce::Colours::greenyellow);
@@ -101,6 +102,12 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
             break;
         }
         g.drawText(text, 20, 59+i * 19, 200, 100, juce::Justification::topLeft, true);
+    }
+
+    if (audioProcessor.piano->getHasClipped())
+    {
+        g.setColour(juce::Colours::orange);
+        g.drawText("CLIP", 140, 15, 200, 100, juce::Justification::topLeft, true);
     }
 }
 

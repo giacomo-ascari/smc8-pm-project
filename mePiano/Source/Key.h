@@ -30,6 +30,7 @@ public:
 	KeyState getState();
 	uint32_t getTime();
 	int getStrings();
+	float getLastValue();
 
 private:
 	KeyState state;
@@ -44,4 +45,5 @@ private:
 	float pitches[MAX_STRINGS_COUNT];
 	juce::Random reliabilityRand;
 	Exciter exciter;
+	float lastValue;
 };

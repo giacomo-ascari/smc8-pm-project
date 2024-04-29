@@ -107,6 +107,7 @@ void MePianoAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    delete piano;
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -169,13 +170,12 @@ void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         for (juce::MidiBufferIterator iter = artificialMidi.begin(); iter != artificialMidi.end(); iter++)
         {
             juce::MidiMessageMetadata metadata = *iter;
-            std::string s = ">>>" + std::to_string(metadata.numBytes);
             juce::MidiMessage msg = metadata.getMessage();
 
             midiMessages.addEvent(msg, midiMessages.getLastEventTime());
         }
+        artificialMidi.clear();
     }
-    artificialMidi.clear();
     
     piano->renderNextBlock(buffer, midiMessages);
 }

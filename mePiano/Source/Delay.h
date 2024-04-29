@@ -5,33 +5,79 @@
 // 96kHz, 20Hz wave period = 4800
 #define DELAY_DEF_SIZE 5000
 
-class Delay
+class SimpleDelay
 {
+private:
+	int cursor;
+	int length; // integer part of the delay length 
+	float memory[DELAY_DEF_SIZE];
 public:
-
-	Delay()
+	SimpleDelay()
 	{
-		size = DELAY_DEF_SIZE;
-		cursor = size - 1;
-		lengthInt = 1; // default
-		lengthDec = 0.f; // default
-		isFractional = false;
-
-		memory = new float[size];
-		for (int i = 0; i < size; i++)
+		cursor = DELAY_DEF_SIZE - 1;
+		length = 1; // default
+		for (int i = 0; i < DELAY_DEF_SIZE; i++)
 		{
 			memory[i] = 0.f;
 		}
 	};
 
-	~Delay()
-	{
-		delete memory;
-	};
+	~SimpleDelay() { };
 
 	void setLength(float l)
 	{
-		if (l < 0 || l >= size) return;
+		if (l < 0 || l >= DELAY_DEF_SIZE) return;
+		length = (int)round(l);
+	};
+
+	void pushSample(float x)
+	{
+		cursor++;
+		if (cursor >= DELAY_DEF_SIZE)
+		{
+			cursor = 0;
+		}
+		memory[cursor] = x;
+	};
+
+	float getSample()
+	{
+		int index = cursor - length;
+		// shift back into valid range
+		if (index < 0) index += DELAY_DEF_SIZE;
+		return memory[index];
+	};
+};
+
+class Delay
+{
+private:
+	int cursor;
+	int lengthInt; // integer part of the delay length 
+	float lengthDec; // decimal part of the delay length
+	bool isFractional; // indicates if the delay is fractional
+	float memory[DELAY_DEF_SIZE];
+
+public:
+
+	Delay()
+	{
+		cursor = DELAY_DEF_SIZE - 1;
+		lengthInt = 1; // default
+		lengthDec = 0.f; // default
+		isFractional = false;
+
+		for (int i = 0; i < DELAY_DEF_SIZE; i++)
+		{
+			memory[i] = 0.f;
+		}
+	};
+
+	~Delay() { };
+
+	void setLength(float l)
+	{
+		if (l < 0 || l >= DELAY_DEF_SIZE) return;
 
 		float floored = std::floorf(l);
 		float decimal = l - floored;
@@ -49,22 +95,10 @@ public:
 		}
 	};
 
-	void resizeMemory(int s)
-	{
-		if (s <= 0) return;
-		delete memory;
-		size = s;
-		memory = new float[size];
-		for (int i = 0; i < size; i++)
-		{
-			memory[i] = 0.f;
-		}
-	};
-
 	void pushSample(float x)
 	{
 		cursor++;
-		if (cursor >= size)
+		if (cursor >= DELAY_DEF_SIZE)
 		{
 			cursor = 0;
 		}
@@ -78,15 +112,15 @@ public:
 			int floorIndex = cursor - lengthInt;
 			int ceilIndex = cursor - lengthInt - 1;
 			// shift back into valid range
-			if (floorIndex < 0) floorIndex += size;
-			if (ceilIndex < 0) ceilIndex += size;
+			if (floorIndex < 0) floorIndex += DELAY_DEF_SIZE;
+			if (ceilIndex < 0) ceilIndex += DELAY_DEF_SIZE;
 			return memory[floorIndex] * (1.f - lengthDec) + memory[ceilIndex] * (lengthDec);
 		}
 		else
 		{
 			int index = cursor - lengthInt;
 			// shift back into valid range
-			if (index < 0) index += size;
+			if (index < 0) index += DELAY_DEF_SIZE;
 			return memory[index];
 		}
 	};
@@ -97,13 +131,6 @@ public:
 		return getSample();
 	}
 
-private:
-	int size;
-	int cursor;
-	int lengthInt; // integer part of the delay length 
-	float lengthDec; // decimal part of the delay length
-	bool isFractional; // indicates if the delay is fractional
-	float* memory;
 };
 
 

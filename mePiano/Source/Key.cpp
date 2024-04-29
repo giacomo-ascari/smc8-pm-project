@@ -9,6 +9,7 @@ Key::Key(float sampleRate) : exciter(sampleRate)
 	activeVelocity = 0;
 	dampenWorks = true;
 	dampenRandomizable = true;
+	lastValue = 0;
 	this->sampleRate = sampleRate;
 
 	for (int i = 0; i < MAX_STRINGS_COUNT; i++)
@@ -55,11 +56,12 @@ void Key::press(float velocity)
 
 	// dampener unreliability 10%
 	if (dampenRandomizable) {
-		if (reliabilityRand.nextFloat() < 0.5) dampenWorks = false;
+		if (reliabilityRand.nextFloat() < 0.01) dampenWorks = false;
 		else dampenWorks = true;
 	}
 
-	exciter.setHammer(pitches[0], activeVelocity);
+	//exciter.setHammer(pitches[0], activeVelocity);
+	exciter.setSquare(0.001, activeVelocity);
 }
 
 void Key::dampen()
@@ -88,12 +90,14 @@ float Key::process()
 
 		time++;
 
+		lastValue = y;
 		return y;
 	}
 	else
 	{
 		time++;
 
+		lastValue = 0.f;
 		return 0.f;
 	}
 	
@@ -117,4 +121,9 @@ uint32_t Key::getTime()
 int Key::getStrings()
 {
 	return activeStrings;
+}
+
+float Key::getLastValue()
+{
+	return lastValue;
 }

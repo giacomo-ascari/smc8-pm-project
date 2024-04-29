@@ -11,12 +11,10 @@
         <FILE id="lzidsL" name="ir.wav" compile="0" resource="1" file="Source/Binary/ir.wav"/>
       </GROUP>
       <GROUP id="{CBF1A318-C038-D1FE-9860-D9FC213BFE29}" name="DSP">
-        <FILE id="ebmtw9" name="Biquad.h" compile="0" resource="0" file="Source/Biquad.h"/>
         <FILE id="L2JpH6" name="Delay.h" compile="0" resource="0" file="Source/Delay.h"/>
         <FILE id="yxe2Um" name="Filter.h" compile="0" resource="0" file="Source/Filter.h"/>
       </GROUP>
       <FILE id="eTSbp3" name="Exciter.h" compile="0" resource="0" file="Source/Exciter.h"/>
-      <FILE id="MTMcW5" name="String.cpp" compile="1" resource="0" file="Source/String.cpp"/>
       <FILE id="woCZFP" name="String.h" compile="0" resource="0" file="Source/String.h"/>
       <FILE id="M7E4lH" name="PitchTables.h" compile="0" resource="0" file="Source/PitchTables.h"/>
       <FILE id="zAdbWd" name="PluginProcessor.cpp" compile="1" resource="0"

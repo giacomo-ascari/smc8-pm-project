@@ -5,14 +5,11 @@ Piano::Piano(float sampleRate, float samplesPerBlock) {
 	
 	this->sampleRate = sampleRate;
 
-	for (int i = 0; i < VOICE_COUNT; i++)
-	{
-		voices[i] = new Key(sampleRate);
-	}
-	for (int i = 0; i < NOTE_COUNT; i++)
-	{
-		noteToVoice[i] = -1;
-	}
+	for (int i = 0; i < VOICE_COUNT; i++) voices[i] = new Key(sampleRate);
+	for (int i = 0; i < NOTE_COUNT; i++) noteToVoice[i] = -1;
+
+	blockProc = 0;
+	hasClipped = false;
 
 	reverb = new juce::dsp::Convolution();
 	spec = juce::dsp::ProcessSpec();
@@ -52,7 +49,6 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		for (juce::MidiBufferIterator iter = midiMessages.begin(); iter != midiMessages.end(); iter++)
 		{
 			juce::MidiMessageMetadata metadata = *iter;
-			std::string s = ">>>" + std::to_string(metadata.numBytes);
 			juce::MidiMessage msg = metadata.getMessage();
 
 			int noteNumber = msg.getNoteNumber();
@@ -103,40 +99,37 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		}
 	}
 
-
 	static uint32_t time = 0;
-	static uint32_t blockProc = 0;
 
-	if (!time) {
-		DBG("FIRST PROC");
-		DBG("sr" + std::to_string(sampleRate));
-		DBG("nc" + std::to_string(numChannels));
-		DBG("ns" + std::to_string(numSamples));
+	if (!blockProc) {
+		DBG("FIRST BLOCK PROC");
+		DBG("  sr" + std::to_string(sampleRate));
+		DBG("  nc" + std::to_string(numChannels));
+		DBG("  ns" + std::to_string(numSamples));
 	}
 
 	for (int i = 0; i < numSamples; i++)
 	{
 
-		float x = (float)time / sampleRate;
-
 		float y = 0;
-		//y = 0.1 * std::sin(juce::MathConstants<float>::twoPi * 440.f * x);
+		
+		y += 0.1 * std::sin(juce::MathConstants<float>::twoPi * 440.f * time / sampleRate);
 
 		for (int i = 0; i < VOICE_COUNT; i++)
 		{
 			y += voices[i]->process();
 		}
 
-		y /= 4;
+		y /= 5;
 
-		if (y >= 1.f)
+		if (y > 1.f)
 		{
-			DBG("clipping");
+			hasClipped = true;
 			y = 1.f;
 		}
 		else if (y < -1.f)
 		{
-			DBG("clipping");
+			hasClipped = true;
 			y = -1.f;
 		}
 
@@ -146,6 +139,7 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		}
 
 		time++;
+
 	}
 
 	//juce::dsp::AudioBlock<float> block { buffer };
@@ -158,4 +152,9 @@ Key** Piano::getVoices(int& len)
 {
 	len = VOICE_COUNT;
 	return voices;
+}
+
+bool Piano::getHasClipped()
+{
+	return hasClipped;
 }
