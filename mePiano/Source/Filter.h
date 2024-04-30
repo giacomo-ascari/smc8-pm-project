@@ -12,7 +12,7 @@
 
 #include <JuceHeader.h>
 
-#define FILTER_MAX_ORDER 5
+#define FILTER_ORDER 3
 
 #define PI juce::MathConstants<float>::pi
 
@@ -25,20 +25,29 @@ enum FilterTypes {
 	BYP  // bypass
 };
 
+// generic filter implementation
+// 4th order
+// y = (b0*x + b1*x^-1 + b2*x^-2 + b3*x^-3 - a1*y^-1 - a2*y^-2  - a3*y^-3) / a0
+
 class Filter
 {
+private:
+    float xBuff[FILTER_ORDER]; // x^-1, x^-2, x^-3
+    float yBuff[FILTER_ORDER]; // y^-1, y^-2, y^-3
+
 public:
 
-	float b[FILTER_MAX_ORDER]; // b0, b1, b2...
-	float a[FILTER_MAX_ORDER]; // a0, a1, a2...
+	float b[FILTER_ORDER+1]; // b0, b1, b2, b3
+	float a[FILTER_ORDER+1]; // a0, a1, a2, a3
+
 
 	Filter()
 	{
-		clearCoeff();
-        for (int i = 0; i < FILTER_MAX_ORDER - 1; i++)
+		reset();
+        for (int i = 0; i < FILTER_ORDER; i++)
         {
-            xBuffer[i] = 0;
-            yBuffer[i] = 0;
+            xBuff[i] = 0;
+            yBuff[i] = 0;
         }
 	};
 
@@ -46,27 +55,46 @@ public:
 
 	float process(float x)
 	{
-		float y = b[0] * x;
-		for (int i = 0; i < FILTER_MAX_ORDER-1; i++)
+        float y = b[0] * x;
+		for (int i = 0; i < FILTER_ORDER; i++)
 		{
-			y += b[i+1] * xBuffer[i];
-			y -= a[i+1] * yBuffer[i];
+			y += b[i+1] * xBuff[i];
+			y += a[i+1] * yBuff[i];
 		}
+        y /= a[0];
 
-		// shift x and y buffer
-		for (int i = FILTER_MAX_ORDER-1; i > 0; i--) {
-			xBuffer[i] = xBuffer[i - 1];
-			yBuffer[i] = yBuffer[i - 1];
-		}
-		xBuffer[0] = x;
-		yBuffer[0] = y;
+        shift();
+        xBuff[0] = x;
+        yBuff[0] = y;
 
 		return y;
 	}
 
+    void shift()
+    {
+        // shift x and y buffer
+        for (int i = FILTER_ORDER-1; i > 0; i--) {
+            xBuff[i] = xBuff[i - 1];
+            yBuff[i] = yBuff[i - 1];
+        }
+        xBuff[0] = 0.f;
+        yBuff[0] = 0.f;
+    }
+
+    void reset()
+    {
+        for (int i = 1; i <= FILTER_ORDER; i++)
+        {
+            b[i] = 0.f;
+            a[i] = 0.f;
+        }
+        b[0] = 1.f;
+        a[0] = 1.f;
+    }
+
 	void configure(float b0, float b1, float b2, float a1, float a2)
 	{
-		clearCoeff();
+        reset();
 		b[0] = b0;
 		b[1] = b1;
 		b[2] = b2;
@@ -76,7 +104,7 @@ public:
 
 	void biquad(FilterTypes type, float sampleRate, float f0, float q_bw)
     {
-        clearCoeff();
+        reset();
         // the bible and jesus christ himself
         // https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 
@@ -151,19 +179,4 @@ public:
         a[0] *= gain; a[1] *= gain; a[2] *= gain;
     };
 
-private:
-	float xBuffer[FILTER_MAX_ORDER]; // x1, x2
-	float yBuffer[FILTER_MAX_ORDER]; // y1, y2
-
-	void clearCoeff() {
-		for (int i = 1; i < FILTER_MAX_ORDER; i++)
-		{
-			b[i] = 0.f;
-			a[i] = 0.f;
-			xBuffer[i] = 0.f;
-			yBuffer[i] = 0.f;
-		}
-		b[0] = 1.f;
-		a[0] = 1.f;
-	}
 };

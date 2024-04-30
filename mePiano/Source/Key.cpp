@@ -56,7 +56,7 @@ void Key::press(float velocity)
 
 	// dampener unreliability 10%
 	if (dampenRandomizable) {
-		if (reliabilityRand.nextFloat() < 0.01) dampenWorks = false;
+		if (reliabilityRand.nextFloat() < 0.10) dampenWorks = false;
 		else dampenWorks = true;
 	}
 

@@ -27,7 +27,7 @@ MePianoAudioProcessor::MePianoAudioProcessor()
 
 MePianoAudioProcessor::~MePianoAudioProcessor()
 {
-    delete piano;
+    //delete piano;
 }
 
 //==============================================================================

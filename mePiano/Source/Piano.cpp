@@ -9,8 +9,14 @@ Piano::Piano(float sampleRate, float samplesPerBlock) {
 	for (int i = 0; i < NOTE_COUNT; i++) noteToVoice[i] = -1;
 
 	blockProc = 0;
+	time = 0;
+
 	hasClipped = false;
 	sinewaveActive = false;
+	reverbBalance = 0.5;
+	reverbBalanceFilter.configure(0.05f, 0.f, 0.f, 0.95f, 0.f);
+	outputGain = 0;
+	outputGainFilter.configure(0.05f, 0.f, 0.f, 0.95f, 0.f);
 
 	reverb = new juce::dsp::Convolution();
 	spec = juce::dsp::ProcessSpec();
@@ -40,10 +46,20 @@ Piano::~Piano()
 
 void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {	
+	//wetBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
+
 	buffer.clear();
 
 	int numSamples = buffer.getNumSamples();
 	int numChannels = buffer.getNumChannels();
+
+	if (!blockProc) {
+		wetBuffer.setSize(numChannels, numSamples);
+		DBG("FIRST BLOCK PROC");
+		DBG("  sr" + std::to_string(sampleRate));
+		DBG("  nc" + std::to_string(numChannels));
+		DBG("  ns" + std::to_string(numSamples));
+	}
 
 	if (!midiMessages.isEmpty())
 	{
@@ -100,19 +116,11 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 		}
 	}
 
-	static uint32_t time = 0;
-
-	if (!blockProc) {
-		DBG("FIRST BLOCK PROC");
-		DBG("  sr" + std::to_string(sampleRate));
-		DBG("  nc" + std::to_string(numChannels));
-		DBG("  ns" + std::to_string(numSamples));
-	}
+	float y = 0;
 
 	for (int i = 0; i < numSamples; i++)
 	{
-
-		float y = 0;
+		y = 0;
 		
 		if (sinewaveActive)
 			y += 0.3f * std::sin(juce::MathConstants<float>::twoPi * 440.f * time / sampleRate);
@@ -122,7 +130,7 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 			y += voices[i]->process();
 		}
 
-		y /= 5;
+		y /= 8;
 
 		if (y > 1.f)
 		{
@@ -144,8 +152,24 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 
 	}
 
-	//juce::dsp::AudioBlock<float> block { buffer };
-	//reverb->process(juce::dsp::ProcessContextReplacing<float>(block));
+
+	float wetGain = reverbBalanceFilter.process(reverbBalance);
+	float dryGain = 1 - reverbBalanceFilter.process(reverbBalance);
+	float gain = powf(10.f, 0.1 * outputGainFilter.process(outputGain));
+
+	juce::dsp::AudioBlock<float> block { buffer };
+	juce::dsp::AudioBlock<float> wetBlock { wetBuffer };
+	reverb->process(juce::dsp::ProcessContextNonReplacing<float>(block, wetBlock));
+
+	for (int i = 0; i < numSamples; i++)
+	{
+		for (int c = 0; c < numChannels; c++)
+		{
+			y = buffer.getSample(c, i) * dryGain + wetBuffer.getSample(c, i) * wetGain;
+			y *= gain;
+			buffer.setSample(c, i, y);
+		}
+	}
 
 	blockProc++;
 }
@@ -164,4 +188,14 @@ bool Piano::getHasClipped()
 void Piano::toggleSinewave(bool value)
 {
 	sinewaveActive = value;
+}
+
+void Piano::setReverbBalance(float value)
+{
+	reverbBalance = value;
+}
+
+void Piano::setOutputGain(float value)
+{
+	outputGain = value;
 }

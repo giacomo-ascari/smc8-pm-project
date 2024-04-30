@@ -19,6 +19,7 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     image = juce::ImageFileFormat::loadFrom(BinaryData::background_png, BinaryData::background_pngSize);
 
     addAndMakeVisible(noteButton);
+    noteButton.setButtonText("Manual note trigger");
     noteButton.setTriggeredOnMouseDown(false);
     noteButton.onClick = [&]() {
         // released
@@ -39,6 +40,7 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
 
     addAndMakeVisible(velocitySlider);
     velocitySlider.setRange(1, 127, 1);
+    velocitySlider.setValue(100);
     velocitySlider.addListener(this);
 
     addAndMakeVisible(velocityLabel);
@@ -47,6 +49,7 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
 
     addAndMakeVisible(noteSlider);
     noteSlider.setRange(33, 117, 1);
+    noteSlider.setValue(80);
     noteSlider.addListener(this);
 
     addAndMakeVisible(noteLabel);
@@ -62,8 +65,36 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
         audioProcessor.piano->toggleSinewave(sinewaveButton.getToggleState());
     };
 
+    addAndMakeVisible(reverbSlider);
+    reverbSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    reverbSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 25);
+    reverbSlider.setRange(0.f, 100.f, 1.f);
+    reverbSlider.onValueChange = [&]() {
+        audioProcessor.piano->setReverbBalance(reverbSlider.getValue() * 0.01f);
+    };
+    reverbSlider.setValue(50.f);
+    reverbSlider.addListener(this);
+
+    addAndMakeVisible(reverbLabel);
+    reverbLabel.setText("Reverb [%]", juce::dontSendNotification);
+    reverbLabel.attachToComponent(&reverbSlider, false);
+
+    addAndMakeVisible(gainSlider);
+    gainSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    gainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 25);
+    gainSlider.setRange(-15.f, 15.f, 0.1f);
+    gainSlider.onValueChange = [&]() {
+        audioProcessor.piano->setOutputGain(gainSlider.getValue());
+    };
+    gainSlider.setValue(0.f);
+    gainSlider.addListener(this);
+
+    addAndMakeVisible(gainLabel);
+    gainLabel.setText("Gain [dB]", juce::dontSendNotification);
+    gainLabel.attachToComponent(&gainSlider, false);
+
     setSize (600, 450);
-    startTimerHz(10);
+    startTimerHz(15);
 }
 
 MePianoAudioProcessorEditor::~MePianoAudioProcessorEditor()
@@ -93,7 +124,7 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
 
     text = "# / note / time / strings";
     g.setColour(juce::Colours::grey);
-    g.drawText(text, 20, 40, 200, 100, juce::Justification::topLeft, true);
+    g.drawText(text, 40, 40, 200, 100, juce::Justification::topLeft, true);
 
     for (int i = 0; i < voiceCount; i++)
     {
@@ -101,7 +132,7 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
         text = text + " " + std::to_string(voices[i]->getMidiNote());
         text = text + " " + std::to_string(voices[i]->getTime() / audioProcessor.getSampleRate());
         text = text + " " + std::to_string(voices[i]->getStrings());
-        text = text + " " + std::to_string(voices[i]->getLastValue());
+        //text = text + " " + std::to_string(voices[i]->getLastValue());
         switch (voices[i]->getState()) {
         case ATTACKING:
             g.setColour(juce::Colours::greenyellow);
@@ -116,7 +147,8 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
             g.setColour(juce::Colours::grey);
             break;
         }
-        g.drawText(text, 20, 59+i * 19, 200, 100, juce::Justification::topLeft, true);
+        g.drawText(text, 40, 59+i * 19, 200, 100, juce::Justification::topLeft, true);
+        g.fillRect(5, 62 + i * 19, (int)(35.f * abs(voices[i]->getLastValue())), 10);
     }
 
     if (audioProcessor.piano->getHasClipped())
@@ -144,4 +176,8 @@ void MePianoAudioProcessorEditor::resized()
     noteSlider.setBounds(getWidth() - w - p, 3 * p + 2 * h, w, h);
     randomButton.setBounds(getWidth() - w - p, 4 * p + 3 * h, w, h);
     sinewaveButton.setBounds(getWidth() - w - p, 5 * p + 4 * h, w, h);
+
+    reverbSlider.setBounds(250, 300, 100, 100);
+    gainSlider.setBounds(350, 300, 100, 100);
+
 }

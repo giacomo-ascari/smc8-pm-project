@@ -31,13 +31,20 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     MePianoAudioProcessor& audioProcessor;
-    juce::TextButton noteButton{ "Play note" };
+    juce::TextButton noteButton;
     juce::Slider velocitySlider;
     juce::Label  velocityLabel;
     juce::Slider noteSlider;
     juce::Label  noteLabel;
     juce::ToggleButton randomButton;
     juce::ToggleButton sinewaveButton;
+
+    juce::Slider reverbSlider;
+    juce::Label reverbLabel;
+
+    juce::Slider gainSlider;
+    juce::Label gainLabel;
+
     juce::Image image;
 
     juce::Random noteRand;

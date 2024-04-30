@@ -9,7 +9,7 @@
 namespace BinaryData
 {
     extern const char*   background_png;
-    const int            background_pngSize = 455111;
+    const int            background_pngSize = 420188;
 
     extern const char*   ir_wav;
     const int            ir_wavSize = 96044;
