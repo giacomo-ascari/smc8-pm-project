@@ -71,7 +71,6 @@ void Key::dampen()
 
 float Key::process()
 {
-	static juce::Random rand;
 
 	if (state != IDLE)
 	{

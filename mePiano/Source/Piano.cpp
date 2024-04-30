@@ -10,6 +10,7 @@ Piano::Piano(float sampleRate, float samplesPerBlock) {
 
 	blockProc = 0;
 	hasClipped = false;
+	sinewaveActive = false;
 
 	reverb = new juce::dsp::Convolution();
 	spec = juce::dsp::ProcessSpec();
@@ -113,7 +114,8 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 
 		float y = 0;
 		
-		y += 0.1 * std::sin(juce::MathConstants<float>::twoPi * 440.f * time / sampleRate);
+		if (sinewaveActive)
+			y += 0.3f * std::sin(juce::MathConstants<float>::twoPi * 440.f * time / sampleRate);
 
 		for (int i = 0; i < VOICE_COUNT; i++)
 		{
@@ -157,4 +159,9 @@ Key** Piano::getVoices(int& len)
 bool Piano::getHasClipped()
 {
 	return hasClipped;
+}
+
+void Piano::toggleSinewave(bool value)
+{
+	sinewaveActive = value;
 }

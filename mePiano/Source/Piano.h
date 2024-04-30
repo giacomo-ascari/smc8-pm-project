@@ -14,6 +14,7 @@ public:
 	void renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
 	Key** getVoices(int &len);
 	bool getHasClipped();
+	void toggleSinewave(bool value);
 	
 private:
 	float sampleRate;
@@ -23,5 +24,6 @@ private:
 	Key* voices[VOICE_COUNT]; // equivalent to voices
 	juce::dsp::Convolution* reverb;
 	juce::dsp::ProcessSpec spec;
+	bool sinewaveActive;
 };
 

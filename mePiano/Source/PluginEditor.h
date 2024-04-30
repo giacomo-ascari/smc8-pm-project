@@ -36,7 +36,11 @@ private:
     juce::Label  velocityLabel;
     juce::Slider noteSlider;
     juce::Label  noteLabel;
+    juce::ToggleButton randomButton;
+    juce::ToggleButton sinewaveButton;
     juce::Image image;
+
+    juce::Random noteRand;
 
     void timerCallback() final {
         AudioProcessorEditor::repaint();

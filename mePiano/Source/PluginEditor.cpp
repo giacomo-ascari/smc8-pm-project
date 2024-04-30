@@ -23,6 +23,12 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     noteButton.onClick = [&]() {
         // released
         audioProcessor.addArtificialMidi(velocitySlider.getValue(), noteSlider.getValue(), false);
+        // update randomizer
+        if (randomButton.getToggleState())
+        {
+            velocitySlider.setValue(noteRand.nextFloat() * (velocitySlider.getMaximum() - velocitySlider.getMinimum()) + velocitySlider.getMinimum());
+            noteSlider.setValue(noteRand.nextFloat() * (noteSlider.getMaximum() - noteSlider.getMinimum()) + noteSlider.getMinimum());
+        }
     };
     noteButton.onStateChange = [&]() {
         if (noteButton.isDown()) {
@@ -46,6 +52,15 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     addAndMakeVisible(noteLabel);
     noteLabel.setText("Note #", juce::dontSendNotification);
     noteLabel.attachToComponent(&noteSlider, true);
+
+    addAndMakeVisible(randomButton);
+    randomButton.setButtonText("Randomize note");
+
+    addAndMakeVisible(sinewaveButton);
+    sinewaveButton.setButtonText("Toggle ref. sinewave");
+    sinewaveButton.onStateChange = [&]() {
+        audioProcessor.piano->toggleSinewave(sinewaveButton.getToggleState());
+    };
 
     setSize (600, 450);
     startTimerHz(10);
@@ -127,4 +142,6 @@ void MePianoAudioProcessorEditor::resized()
     noteButton.setBounds(getWidth() - w - p, p, w, h);
     velocitySlider.setBounds(getWidth() - w - p, 2 * p + h, w, h);
     noteSlider.setBounds(getWidth() - w - p, 3 * p + 2 * h, w, h);
+    randomButton.setBounds(getWidth() - w - p, 4 * p + 3 * h, w, h);
+    sinewaveButton.setBounds(getWidth() - w - p, 5 * p + 4 * h, w, h);
 }
