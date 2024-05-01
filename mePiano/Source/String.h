@@ -7,7 +7,7 @@ class String
 {
 protected:
 	float sampleRate;
-	Delay frontTopSegment, frontBotSegment, backSegment;
+	Delay frontTopSegment, frontBotSegment, backTopSegment, backBotSegment;
 	Filter filterTop, filterBot;
 	float gain;
 
@@ -17,7 +17,9 @@ public:
 		this->sampleRate = sampleRate;
 		//filterTop.biquad(LPF, sampleRate, 15000.f, 0.7071f);
 		//filterBot.biquad(LPF, sampleRate, 12000.f, 0.7071f);
-		gain = -0.990f; // -0.995
+		filterTop.configure(0.6, 0, 0, 0.4, 0);
+		filterBot.configure(0.6, 0, 0, 0.4, 0);
+		gain = -0.996f; // -0.995
 		setSize(440.f, 0.2f);
 	};
 
@@ -29,12 +31,15 @@ public:
 		// hammer pos between 0 and 1
 		frontTopSegment.setLength(length * (1 - hammerPos));
 		frontBotSegment.setLength(length * hammerPos);
-		backSegment.setLength(length);
+		backTopSegment.setLength(length * (1 - hammerPos));
+		backBotSegment.setLength(length * hammerPos);
 	};
 
 	static float process(String** strings, int stringsCount, float x, bool dampen)
 	{
-		float input = 0, output = 0;
+		float y = 0;
+
+		float temp = 0;
 		static float middle[3]; // max 3 string dum dum
 
 		if (stringsCount == 0 || stringsCount > 3) return 0;
@@ -47,26 +52,18 @@ public:
 
 			// Sum x and the output of third delay and feed to first delay
 			// if dampening, also pass it through the additional filter
-			input = x + string->frontBotSegment.getSample();
-			if (dampen)
-			{
-				//string->frontTopSegment.pushSample(string->dampener.process(input));
-				string->frontTopSegment.pushSample(input * 0.94f);
-			}
-			else
-			{
-				string->frontTopSegment.pushSample(input);
-			}
+			temp = x + string->frontBotSegment.getSample();
+			if (dampen) string->frontTopSegment.pushSample(temp * 0.95f);
+			else string->frontTopSegment.pushSample(temp);
 
 			// Get output of first delay and process it through the termination
 			// Get the ouput of the termination
-			//middle[i] = string->filterTop.process(string->gain * string->frontTopSegment.getSample());
-			middle[i] = string->gain * string->frontTopSegment.getSample();
-			output += middle[i];
+			middle[i] = string->gain * string->filterTop.process(string->frontTopSegment.getSample());
 		}
 
+		
 		// Rescale the output thing
-		output /= stringsCount;
+		
 
 		// Simulate the second part of the model
 		// and feed the simpathetic influence
@@ -79,7 +76,7 @@ public:
 			// read the simpathetic of the other string and rescaleit
 			if (stringsCount == 1)
 			{
-				string->backSegment.pushSample(middle[i]);
+				string->backTopSegment.pushSample(middle[i]);
 			}
 			else
 			{
@@ -89,15 +86,22 @@ public:
 					if (j != i) sympathetic += middle[i];
 				}
 				sympathetic /= (stringsCount - 1);
-				string->backSegment.pushSample(0.5f * middle[i] + 0.5f * sympathetic);
+				string->backTopSegment.pushSample(0.5f * middle[i] + 0.5f * sympathetic);
 			}
 
+			// Get output of bottom top termination and use it as output
+			// then feed it to fourth delay
+			temp = string->backTopSegment.getSample();
+			string->backBotSegment.pushSample(temp);
+			y += temp;
+
+
 			// Get output of the bottom termination and feed to the third delay
-			//string->frontBotSegment.pushSample(string->filterBot.process(string->gain * string->backSegment.getSample()));
-			string->frontBotSegment.pushSample(string->gain * string->backSegment.getSample());
+			string->frontBotSegment.pushSample(string->gain * string->filterBot.process(string->backBotSegment.getSample()));
 		}
 
-		return output;
+		y /= stringsCount;
+		return y;
 	};
 
 };

@@ -19,6 +19,7 @@ public:
 	void toggleSinewave(bool value);
 	void setReverbBalance(float value);
 	void setOutputGain(float value);
+	float getLoad();
 	
 private:
 	float sampleRate;
@@ -37,7 +38,9 @@ private:
 	float outputGain;
 	Filter outputGainFilter;
 
-
+	// performance
+	uint32_t startTime, stopTime, elapsed, available;
+	float load;
 
 };
 

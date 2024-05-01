@@ -177,7 +177,9 @@ void MePianoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         artificialMidi.clear();
     }
     
+    
     piano->renderNextBlock(buffer, midiMessages);
+
 }
 
 //==============================================================================

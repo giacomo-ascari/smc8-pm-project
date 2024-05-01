@@ -62,7 +62,7 @@ public:
 		DBG(sampleRate);
 		this->time = 0;
 		this->type = HAMMER;
-		this->filter.configure(0.34, 0.33, 0.33, 0, 0);
+		this->filter.configure(0.5, 0, 0, 0.5, 0);
 		//this->attackLen = 0.001f * sampleRate;
 		//this->decayLen = (1.f / 8.f / pitch) * sampleRate; // fourth of wave period
 		//this->amplitude = (0.5f + velocity) * 0.67f; // from 0.33 to 1

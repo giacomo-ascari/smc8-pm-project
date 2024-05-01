@@ -33,6 +33,11 @@ Piano::Piano(float sampleRate, float samplesPerBlock) {
 		juce::dsp::Convolution::Normalise::no
 	);
 	reverb->prepare(spec);
+
+	startTime = 0;
+	stopTime = 0;
+	elapsed = 0;
+	available = 1;
 }
 
 Piano::~Piano()
@@ -46,7 +51,7 @@ Piano::~Piano()
 
 void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {	
-	//wetBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
+	startTime = juce::Time::getMillisecondCounter();
 
 	buffer.clear();
 
@@ -55,6 +60,7 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 
 	if (!blockProc) {
 		wetBuffer.setSize(numChannels, numSamples);
+		available = (float)numSamples / sampleRate * 1000.f;
 		DBG("FIRST BLOCK PROC");
 		DBG("  sr" + std::to_string(sampleRate));
 		DBG("  nc" + std::to_string(numChannels));
@@ -76,6 +82,8 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 				// if note on
 				if (msg.isNoteOn())
 				{
+					//DBG("Note " << noteNumber << " on");
+
 					// if no voice is set to the note
 					if (noteToVoice[noteNumber - LOWER_NOTE] == -1)
 					{
@@ -105,6 +113,8 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 				}
 				else if (msg.isNoteOff())
 				{
+					//DBG("Note " << noteNumber << " off");
+
 					int voiceToShut = noteToVoice[noteNumber - LOWER_NOTE];
 					if (voiceToShut != -1)
 					{
@@ -172,6 +182,11 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 	}
 
 	blockProc++;
+
+	stopTime = juce::Time::getMillisecondCounter();
+	elapsed = stopTime - startTime;
+
+	load = (float)elapsed / available;
 }
 
 Key** Piano::getVoices(int& len)
@@ -198,4 +213,9 @@ void Piano::setReverbBalance(float value)
 void Piano::setOutputGain(float value)
 {
 	outputGain = value;
+}
+
+float Piano::getLoad()
+{
+	return load;
 }

@@ -27,7 +27,7 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
         // update randomizer
         if (randomButton.getToggleState())
         {
-            velocitySlider.setValue(noteRand.nextFloat() * (velocitySlider.getMaximum() - velocitySlider.getMinimum()) + velocitySlider.getMinimum());
+            //velocitySlider.setValue(noteRand.nextFloat() * (velocitySlider.getMaximum() - velocitySlider.getMinimum()) + velocitySlider.getMinimum());
             noteSlider.setValue(noteRand.nextFloat() * (noteSlider.getMaximum() - noteSlider.getMinimum()) + noteSlider.getMinimum());
         }
     };
@@ -156,6 +156,9 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
         g.setColour(juce::Colours::orange);
         g.drawText("CLIP", 140, 15, 200, 100, juce::Justification::topLeft, true);
     }
+
+    g.setColour(juce::Colours::white);
+    g.drawText(std::to_string(audioProcessor.piano->getLoad()*100.f), 200, 15, 200, 100, juce::Justification::topLeft, true);
 }
 
 void MePianoAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
