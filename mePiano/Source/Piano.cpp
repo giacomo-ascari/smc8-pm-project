@@ -1,7 +1,8 @@
 #include "Piano.h"
 
 
-Piano::Piano(float sampleRate, float samplesPerBlock) {
+Piano::Piano(float sampleRate, float samplesPerBlock)
+{
 	
 	this->sampleRate = sampleRate;
 
@@ -59,12 +60,9 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 	int numChannels = buffer.getNumChannels();
 
 	if (!blockProc) {
+		// first block
 		wetBuffer.setSize(numChannels, numSamples);
 		available = (float)numSamples / sampleRate * 1000.f;
-		DBG("FIRST BLOCK PROC");
-		DBG("  sr" + std::to_string(sampleRate));
-		DBG("  nc" + std::to_string(numChannels));
-		DBG("  ns" + std::to_string(numSamples));
 	}
 
 	if (!midiMessages.isEmpty())
@@ -185,7 +183,6 @@ void Piano::renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& 
 
 	stopTime = juce::Time::getMillisecondCounter();
 	elapsed = stopTime - startTime;
-
 	load = (float)elapsed / available;
 }
 

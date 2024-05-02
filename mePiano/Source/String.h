@@ -15,11 +15,11 @@ public:
 	String(float sampleRate)
 	{
 		this->sampleRate = sampleRate;
-		//filterTop.biquad(LPF, sampleRate, 15000.f, 0.7071f);
-		//filterBot.biquad(LPF, sampleRate, 12000.f, 0.7071f);
-		filterTop.configure(0.6, 0, 0, 0.4, 0);
-		filterBot.configure(0.6, 0, 0, 0.4, 0);
-		gain = -0.996f; // -0.995
+		filterTop.biquad(LPF, sampleRate, 14000.f, 0.701f);
+		filterBot.biquad(LPF, sampleRate, 12000.f, 0.701f);
+		//filterTop.configure(0.5, 0, 0, 0.5, 0);
+		//filterBot.configure(0.5, 0, 0, 0.5, 0);
+		gain = -0.995f; // -0.995
 		setSize(440.f, 0.2f);
 	};
 
@@ -41,6 +41,7 @@ public:
 
 		float temp = 0;
 		static float middle[3]; // max 3 string dum dum
+		float sympathetic = 0;
 
 		if (stringsCount == 0 || stringsCount > 3) return 0;
 
@@ -61,10 +62,6 @@ public:
 			middle[i] = string->gain * string->filterTop.process(string->frontTopSegment.getSample());
 		}
 
-		
-		// Rescale the output thing
-		
-
 		// Simulate the second part of the model
 		// and feed the simpathetic influence
 		for (int i = 0; i < stringsCount; i++)
@@ -78,29 +75,31 @@ public:
 			{
 				string->backTopSegment.pushSample(middle[i]);
 			}
-			else
+			else if (stringsCount == 2)
 			{
-				float sympathetic = 0;
-				for (int j = 0; j < stringsCount; j++)
-				{
-					if (j != i) sympathetic += middle[i];
-				}
-				sympathetic /= (stringsCount - 1);
+				sympathetic = middle[(i + 1) % 2];
 				string->backTopSegment.pushSample(0.5f * middle[i] + 0.5f * sympathetic);
 			}
+			else
+			{
+				sympathetic = middle[(i + 1) % 3] + middle[(i + 2) % 3];
+				sympathetic *= 0.5;
+				string->backTopSegment.pushSample(0.33f * middle[i] + 0.67f * sympathetic);
+			}
 
-			// Get output of bottom top termination and use it as output
+			// Get output of bottom top termination and use it as y output
 			// then feed it to fourth delay
 			temp = string->backTopSegment.getSample();
 			string->backBotSegment.pushSample(temp);
 			y += temp;
 
-
 			// Get output of the bottom termination and feed to the third delay
 			string->frontBotSegment.pushSample(string->gain * string->filterBot.process(string->backBotSegment.getSample()));
 		}
 
+		// Rescale the output thing
 		y /= stringsCount;
+
 		return y;
 	};
 

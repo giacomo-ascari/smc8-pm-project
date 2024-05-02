@@ -13,12 +13,13 @@ public:
 	Piano(float sampleRate, float samplesPerBlock);
 	~Piano();
 	void renderNextBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
-	Key** getVoices(int &len);
-	// members for UI
+	// user interface
+	Key** getVoices(int& len);
 	bool getHasClipped();
 	void toggleSinewave(bool value);
 	void setReverbBalance(float value);
 	void setOutputGain(float value);
+	// performance
 	float getLoad();
 	
 private:
@@ -30,7 +31,7 @@ private:
 	juce::dsp::ProcessSpec spec;
 	juce::AudioBuffer<float> wetBuffer;
 	uint32_t time;
-	// members for UI
+	// user interface
 	bool hasClipped;
 	bool sinewaveActive;
 	float reverbBalance;
