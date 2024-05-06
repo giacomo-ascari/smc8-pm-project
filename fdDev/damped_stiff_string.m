@@ -7,13 +7,17 @@ dur = 3;
 % parameter (lambda groups them all) 
 c = 200;
 L = 1;
+kappa = 10;
 s0 = 1;
 s1 = 0.005;
-kappa = 10;
-k = 1;
 
+k = 1/fs;
 h = sqrt((c*c*k*k + 4*s1*k + sqrt((c*c*k*k + 4*s1*k)^2 + 16*kappa*kappa*k*k)) / 2);
- 
+
+
+lambda = c*k/h;
+mu = kappa*k/(h^2);
+
 % time only scouts +1, 0, -1 
 u_next = zeros(1, N); 
 u_curr = zeros(1, N); 
@@ -30,9 +34,14 @@ for n = 1:dur*fs
     u_curr(input_pos) = u_curr(input_pos) + input(n); 
      
     % iterate over length 
-    for l = (1+2):(N-2)
+    for l = (1+1):(N-1)
         
-        u_next(l) = lambda * (u_curr(l+2) - 4*u_curr(l+1) + 6*u_curr(l) - 4*u_curr(l-1) + u_curr(l-2)) + 2*u_curr(l) - u_prev(l); 
+        u_next(l) = (1 / (1+s0*k)) * (...
+            + (2 - 2*lambda*lambda - 6*mu*mu - 4*s1*k/(h*h)) * u_curr(l) + ...
+            + (lambda*lambda + 4*mu*mu + 2*s1*k/(h*h)) * (u_curr(l+1) + u_curr(l-1)) + ...
+            - mu*mu*(u_curr(l+2) + u_curr(l-2) + ...
+            + (-1 + s0*k + 4*s1*k/(h*h)) * u_prev(l) + ...
+            - 2*s1*k/(h*h) * (u_prev(l+1) + u_prev(l-1)))); 
     end 
  
     % boundaries 
