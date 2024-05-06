@@ -41,7 +41,6 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     addAndMakeVisible(velocitySlider);
     velocitySlider.setRange(1, 127, 1);
     velocitySlider.setValue(100);
-    velocitySlider.addListener(this);
 
     addAndMakeVisible(velocityLabel);
     velocityLabel.setText("Velocity", juce::dontSendNotification);
@@ -50,7 +49,6 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
     addAndMakeVisible(noteSlider);
     noteSlider.setRange(33, 117, 1);
     noteSlider.setValue(80);
-    noteSlider.addListener(this);
 
     addAndMakeVisible(noteLabel);
     noteLabel.setText("Note #", juce::dontSendNotification);
@@ -73,7 +71,6 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
         audioProcessor.piano->setReverbBalance(reverbSlider.getValue() * 0.01f);
     };
     reverbSlider.setValue(50.f);
-    reverbSlider.addListener(this);
 
     addAndMakeVisible(reverbLabel);
     reverbLabel.setText("Reverb [%]", juce::dontSendNotification);
@@ -87,14 +84,13 @@ MePianoAudioProcessorEditor::MePianoAudioProcessorEditor (MePianoAudioProcessor&
         audioProcessor.piano->setOutputGain(gainSlider.getValue());
     };
     gainSlider.setValue(0.f);
-    gainSlider.addListener(this);
 
     addAndMakeVisible(gainLabel);
     gainLabel.setText("Gain [dB]", juce::dontSendNotification);
     gainLabel.attachToComponent(&gainSlider, false);
 
     setSize (600, 450);
-    startTimerHz(15);
+    startTimerHz(20);
 }
 
 MePianoAudioProcessorEditor::~MePianoAudioProcessorEditor()
@@ -132,7 +128,6 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
         text = text + " " + std::to_string(voices[i]->getMidiNote());
         text = text + " " + std::to_string(voices[i]->getTime() / audioProcessor.getSampleRate());
         text = text + " " + std::to_string(voices[i]->getStrings());
-        //text = text + " " + std::to_string(voices[i]->getLastValue());
         switch (voices[i]->getState()) {
         case ATTACKING:
             g.setColour(juce::Colours::greenyellow);
@@ -157,14 +152,9 @@ void MePianoAudioProcessorEditor::paint(juce::Graphics& g)
         g.drawText("CLIP", 140, 15, 200, 100, juce::Justification::topLeft, true);
     }
 
+    text = std::to_string((int)floor(audioProcessor.piano->getLoad() * 100.f)) + "%";
     g.setColour(juce::Colours::white);
-    g.drawText(std::to_string(audioProcessor.piano->getLoad()*100.f), 200, 15, 200, 100, juce::Justification::topLeft, true);
-}
-
-void MePianoAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
-{
-    //if (slider == &velocitySlider)
-    //    durationSlider.setValue(1.0 / velocitySlider.getValue(), juce::dontSendNotification);
+    g.drawText(text, 200, 15, 200, 100, juce::Justification::topLeft, true);
 }
 
 void MePianoAudioProcessorEditor::resized()
@@ -182,5 +172,4 @@ void MePianoAudioProcessorEditor::resized()
 
     reverbSlider.setBounds(250, 300, 100, 100);
     gainSlider.setBounds(350, 300, 100, 100);
-
 }

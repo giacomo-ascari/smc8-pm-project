@@ -26,7 +26,6 @@ class Exciter
 public:
 	Exciter(float sampleRate)
 	{
-		this->time = 0;
 		this->type = SQUARE;
 		this->filter.configure(1, 0, 0, 0, 0);
 		this->attackLen = 1;
@@ -39,7 +38,6 @@ public:
 
 	void setSquare(float attackDur, float amplitude)
 	{
-		this->time = 0;
 		this->type = SQUARE;
 		this->filter.configure(1, 0, 0, 0, 0);
 		this->attackLen = attackDur * this->sampleRate;
@@ -49,7 +47,6 @@ public:
 
 	void setTriangle(float attackDur, float decayDur, float amplitude)
 	{
-		this->time = 0;
 		this->type = TRIANGLE;
 		this->filter.configure(1, 0, 0, 0, 0);
 		this->attackLen = attackDur * this->sampleRate;
@@ -60,18 +57,18 @@ public:
 	void setHammer(float pitch, float velocity)
 	{
 		DBG(sampleRate);
-		this->time = 0;
 		this->type = HAMMER;
-		this->filter.configure(0.5, 0, 0, 0.5, 0);
-		//this->attackLen = 0.001f * sampleRate;
-		//this->decayLen = (1.f / 8.f / pitch) * sampleRate; // fourth of wave period
-		//this->amplitude = (0.5f + velocity) * 0.67f; // from 0.33 to 1
-		this->attackLen = 0.001f * (1.f - velocity) * sampleRate;
-		this->decayLen = (4.f / pitch) * sampleRate; // fourth of wave period
-		this->amplitude = (0.5f + velocity / 2); // from 0.5 to 1
+		//this->filter.configure(0.5, 0, 0, 0.5, 0);
+		this->filter.configure(1, 0, 0, 0, 0);
+		this->attackLen = 0.001f * sampleRate;
+		this->decayLen = (0.5f / pitch) * sampleRate;
+		this->amplitude = (0.5f + velocity / 2.f);
+		//this->attackLen = 0.001f * (1.f - velocity) * sampleRate;
+		//this->decayLen = (4.f / pitch) * sampleRate; // fourth of wave period
+		//this->amplitude = (0.5f + velocity / 2); // from 0.5 to 1
 	}
 
-	float process()
+	float process(uint32_t time)
 	{
 		float y = 0;
 
@@ -96,33 +93,29 @@ public:
 			else y = 0;
 		}
 
-		time++;
-		
 		y = this->filter.process(y);
 		y *= this->amplitude;
 
 		return y;
 	}
 
-	bool isAttacking()
+	bool isAttacking(uint32_t time)
 	{
 		return (time < attackLen);
 	}
 
-	bool isDecaying()
+	bool isDecaying(uint32_t time)
 	{
 		return (time < attackLen + decayLen);
 	}
 
 private:
 
-	juce::uint32 time;
-
 	ExciterTypes type;
 	Filter filter;
 
-	juce::uint32 attackLen;
-	juce::uint32 decayLen;
+	uint32_t attackLen;
+	uint32_t decayLen;
 
 	float amplitude;
 	float sampleRate;

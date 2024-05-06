@@ -16,8 +16,7 @@
 */
 class MePianoAudioProcessorEditor :
     public juce::AudioProcessorEditor,
-    private juce::Timer,
-    public juce::Slider::Listener
+    private juce::Timer
 {
 public:
     MePianoAudioProcessorEditor (MePianoAudioProcessor&);
@@ -52,9 +51,6 @@ private:
     void timerCallback() final {
         AudioProcessorEditor::repaint();
     }
-
-    void sliderValueChanged(juce::Slider* slider) override;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MePianoAudioProcessorEditor)
 };

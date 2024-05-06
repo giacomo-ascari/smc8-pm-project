@@ -50,18 +50,18 @@ void Key::tune(int midiNoteNumber)
 void Key::press(float velocity)
 {
 	// reset time and start excitation
-	time = 0;
+	time = 0; // used for exciter
 	state = ATTACKING;
 	activeVelocity = velocity / 127.f;
 
 	// dampener unreliability 10%
 	if (dampenRandomizable) {
-		if (reliabilityRand.nextFloat() < 0.10) dampenWorks = false;
+		if (reliabilityRand.nextFloat() < 0.1f) dampenWorks = false;
 		else dampenWorks = true;
 	}
 
-	//exciter.setHammer(pitches[0], activeVelocity);
-	exciter.setSquare(0.001, activeVelocity);
+	exciter.setHammer(pitches[0], activeVelocity);
+	//exciter.setSquare(0.001, activeVelocity);
 }
 
 void Key::dampen()
@@ -71,35 +71,25 @@ void Key::dampen()
 
 float Key::process()
 {
+	float y = 0.f;
+	float excitation = 0.f;
 
 	if (state != IDLE)
 	{
-		float y = 0.f;
-		float excitation = 0.f;
+		excitation = exciter.process(time);
 
-		excitation = exciter.process();
-
-		//if (exciter.isAttacking()) state = ATTACKING;
-		//else if (exciter.isDecaying()) state = DECAYING;
-		//else state = RELEASING;
+		if (exciter.isAttacking(time)) state = ATTACKING;
+		else if (exciter.isDecaying(time)) state = DECAYING;
+		else state = RELEASING;
 
 		bool dampen = (state == RELEASING) && dampenWorks;
 
 		y = String::process(strings, activeStrings, excitation, dampen);
-
-		time++;
-
-		lastValue = y;
-		return y;
 	}
-	else
-	{
-		time++;
 
-		lastValue = 0.f;
-		return 0.f;
-	}
-	
+	time++;
+	lastValue = y;
+	return y;
 }
 
 int Key::getMidiNote()

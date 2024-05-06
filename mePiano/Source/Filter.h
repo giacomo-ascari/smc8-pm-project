@@ -40,7 +40,6 @@ public:
 	float b[FILTER_ORDER+1]; // b0, b1, b2, b3
 	float a[FILTER_ORDER+1]; // a0, a1, a2, a3
 
-
 	Filter()
 	{
 		reset();
@@ -176,7 +175,7 @@ public:
         // normalize to a0 = 1
         float gain = (1 / a[0]);
         b[0] *= gain; b[1] *= gain; b[2] *= gain;
-        a[0] *= gain; a[1] *= gain; a[2] *= gain;
+        a[0] = 1.f; a[1] *= -gain; a[2] *= -gain;
     };
 
 };
